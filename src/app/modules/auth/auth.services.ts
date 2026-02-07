@@ -6,6 +6,8 @@ import  bcrypt from 'bcryptjs'
 import { createUserToken } from "../../utils/createUserToken";
 import { generateOTP } from "../../utils/generate.otp";
 import { sendEmail } from "../../utils/sendEmail";
+import { Secret } from "jsonwebtoken";
+import config from "../../../config";
 
 const login=async(payload:ILoginPayload)=>{
     const user=await prisma.user.findUnique({where:{email:payload.email}})
@@ -61,7 +63,6 @@ const sendOtp=async(email:string)=>{
   
 }
 
-
 const verifyOTP = async (userId: string, inputOtp: string) => {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw new AppError(httpStatus.NOT_FOUND,"User not found");
@@ -80,10 +81,66 @@ const verifyOTP = async (userId: string, inputOtp: string) => {
 };
 
 
+const forgetPassword=async(email:string)=>{
+    const user=await prisma.user.findUnique({where:{email}})
+    if(!user){
+        throw new AppError(httpStatus.NOT_FOUND,'User not found')
+    }
+  const token = createUserToken(user);
+
+  const resetUrl = `${config.client_url}/reset-password?token=${token.accessToken}&id=${user.id}`;
+ 
+  return await prisma.$transaction(async (tx) => {
+
+   await  tx.user.update({
+      where: { id: user.id },
+      data: { otpExpiresAt: new Date(Date.now() + 2 * 60 * 1000) },
+    });
+
+     sendEmail({
+    to: user.email,
+    subject: 'Reset Password',
+    templateName: 'forgetPassword',
+    templateData: {
+        appName: 'Example App',
+      name: user.name,
+      resetUrl,
+      expiresIn: 2,
+      year: new Date().getFullYear(),
+      supportUrl:'https://support.example.com/support'
+    },
+  });
+
+  return {
+    id: user.id,
+    message: 'Password reset link sent successfully',
+  };
+  })
+}
+
+const resetPassword=async(id:string,password:string)=>{
+    const user=await prisma.user.findUnique({where:{id}})
+    if(!user){
+        throw new AppError(httpStatus.NOT_FOUND,'User not found')
+    }
+    if(user.otpExpiresAt && user.otpExpiresAt < new Date()){
+        throw new AppError(httpStatus.BAD_REQUEST,'OTP expired')
+    }
+    const hashedPass=await bcrypt.hash(password,config.bcrypt_salt_rounds)
+     await prisma.user.update({where:{id},data:{password:hashedPass,otpExpiresAt:null}})
+     return{
+        id:user.id,
+        message:'Password reset successfully'
+     }
+}
+
+
 
 
 export const authServices={
     login,
     verifyOTP,
-    sendOtp
+    sendOtp,
+    forgetPassword,
+    resetPassword
 }

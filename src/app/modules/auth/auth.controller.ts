@@ -25,8 +25,23 @@ const verifyOTP=catchAsyncFn(async(req:Request,res:Response,next:NextFunction)=>
 })
 
 
+const forgetPassword=catchAsyncFn(async(req:Request,res:Response,next:NextFunction)=>{
+    const user=await authServices.forgetPassword(req.body.email)
+
+    sendResponse(res,{success:true,statusCode:httpStatus.OK,message:user.message,data:null})
+})
+
+const resetPassword=catchAsyncFn(async(req:Request,res:Response,next:NextFunction)=>{
+    const user=await authServices.resetPassword(req.params.id as string,req.body.password)
+
+    sendResponse(res,{success:true,statusCode:httpStatus.OK,message:user.message,data:null})
+})
+
+
 export const  authController={
     login,
     verifyOTP,
-    sentOTP
+    sentOTP,
+    forgetPassword,
+    resetPassword
 }

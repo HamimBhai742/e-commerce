@@ -12,3 +12,7 @@ export const otpSchema=z.object({
 export const sentOtpSchema=z.object({
     email:z.email()
 })
+
+export const  resetPassSchema=z.object({
+    password:z.string().min(6).max(50)
+})
