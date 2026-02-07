@@ -9,8 +9,8 @@ const register=catchAsyncFn(async(req:Request,res:Response,next:NextFunction)=>{
     sendResponse(res,{
         success:true,
         statusCode:201,
-        message:'User Register Successfully',
-        data:user
+        message:user.message,
+        data:user.id
     })
 })
 

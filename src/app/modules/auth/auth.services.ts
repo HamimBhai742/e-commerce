@@ -4,6 +4,8 @@ import { prisma } from "../../lib/prisma";
 import httpStatus from "http-status";
 import  bcrypt from 'bcryptjs'
 import { createUserToken } from "../../utils/createUserToken";
+import { generateOTP } from "../../utils/generate.otp";
+import { sendEmail } from "../../utils/sendEmail";
 
 const login=async(payload:ILoginPayload)=>{
     const user=await prisma.user.findUnique({where:{email:payload.email}})
@@ -30,6 +32,58 @@ const login=async(payload:ILoginPayload)=>{
     }
 }
 
+const sendOtp=async(email:string)=>{
+    const user=await prisma.user.findUnique({where:{email}})
+
+    if(!user){
+        throw new AppError(httpStatus.NOT_FOUND,'User not found')
+    }
+
+    const otp=generateOTP()
+    const otpExpiresAt=new Date(Date.now() + 2 * 60 * 1000)
+ 
+    return await prisma.$transaction(async (tx) => {
+        await prisma.user.update({
+            where:{id:user.id},
+            data:{otp,otpExpiresAt}
+        })
+        await sendEmail({
+            to:user.email,
+            subject:'Verify Your Email',
+            templateName:'OtpTemplates',
+            templateData:{...user,otpExpires:2,year:new Date().getFullYear(),otp}
+        })
+        return{
+            id:user.id,
+            message:'OTP sent successfully'
+        }
+    })
+  
+}
+
+
+const verifyOTP = async (userId: string, inputOtp: string) => {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new AppError(httpStatus.NOT_FOUND,"User not found");
+  if (user.isVerified) throw new AppError( httpStatus.BAD_REQUEST,"User already verified");
+  if (!user.otp || !user.otpExpiresAt) throw new AppError( httpStatus.BAD_REQUEST,"No OTP set");
+  if (user.otpExpiresAt < new Date()) throw new AppError(httpStatus.BAD_REQUEST,"OTP expired");
+  if (user.otp !== inputOtp) throw new AppError(httpStatus.BAD_REQUEST,"Invalid OTP");
+
+  // OTP valid → verify user
+  await prisma.user.update({
+    where: { id: userId },
+    data: { isVerified: true, otp: null, otpExpiresAt: null },
+  });
+
+  return { message: "User verified successfully" };
+};
+
+
+
+
 export const authServices={
-    login
+    login,
+    verifyOTP,
+    sendOtp
 }
