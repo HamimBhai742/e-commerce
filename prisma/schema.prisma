@@ -19,10 +19,58 @@ model User{
   isDeleted Boolean @default(false)
   otp       String? 
   otpExpiresAt   DateTime?  
-
+ review  Review[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+
+model Product {
+  id               String   @id @default(uuid())
+  name             String
+  slug             String   @unique
+  description      String
+  shortDescription String?
+  price            Float
+  discountPrice    Float?
+  sku              String   @unique
+  stock            Int
+  isInStock        Boolean  @default(true)
+  status           String   @default("active")
+
+  thumbnail        String
+  images           String[]
+
+  weight           Float?
+  material         String?
+
+  categoryId       String
+  brandId          String?
+
+  rating           Float    @default(0)
+  reviewCount      Int      @default(0)
+  
+  isFeatured       Boolean  @default(false)
+
+  review            Review[]
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Review {
+  id String @id @default(uuid())
+  review String
+  userId String
+  productId String
+  product Product @relation(fields: [productId],references: [id])
+  user User   @relation(fields: [userId],references: [id])
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  @@unique([productId,userId])
+}
+
 
 enum Role{
   user
