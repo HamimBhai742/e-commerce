@@ -21,9 +21,30 @@ model User{
   otpExpiresAt   DateTime?  
  review  Review[]
  cart Cart[]
+ address Address[] 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@map("users")
+}
+
+model Address{
+  id String @id @default(uuid())
+  aptNumber String
+  aptName String
+  street String
+  sub_district String
+  district String
+  postalCode String
+  isDefault Boolean @default(false)
+  phone String  @unique
+  address String?
+  userId String 
+  user User @relation(fields: [userId],references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("address")
 }
 
 
@@ -84,6 +105,9 @@ model Cart{
   @@unique([productId,userId])
   @@map("carts")
 }
+
+
+
 
 
 enum Role{

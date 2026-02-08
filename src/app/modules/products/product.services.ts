@@ -4,7 +4,6 @@ import { prisma } from "../../lib/prisma";
 import { generateUniqueSlug } from "../../utils/generateUniqueSlug";
 import { generateSKU } from "../../utils/generateSku";
 import { Request } from "express";
-import { fileUploader } from "../../utils/multer";
 
 const createProduct = async (req:Request) => {
 
