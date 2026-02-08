@@ -21,7 +21,6 @@ const slug = await generateUniqueSlug(payload.name, async (slug) => {
 })   
 
 const sku= generateSKU()
-console.log(slug,sku,payload)
  return await prisma.product.create({ data: {...payload,slug,sku} });
 };
 

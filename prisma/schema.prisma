@@ -25,6 +25,7 @@ model User{
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@map("users")
+  orders Order[]
 }
 
 model Address{
@@ -100,10 +101,58 @@ model Cart{
   userId String
   user User @relation(fields: [userId],references: [id])
   quantity Float @default(1)
+  amount Float
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@unique([productId,userId])
   @@map("carts")
+}
+
+
+model Payment{
+  id String @id @default(uuid())
+  status PaymentStatus @default(PENDING)
+  sub_total Float 
+  orders Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("payments")
+}
+
+
+model Order{
+  id String @id @default(uuid())
+  order_number String @unique
+  total_amount Float 
+  status OrderStatus @default(PAYMENT_PENDING)
+  userId String
+  user User @relation(fields: [userId],references: [id])
+  items String[]
+  paymentId String
+  payment Payment  @relation(fields: [paymentId],references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("orders")
+}
+
+enum PaymentStatus{
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+  REFUNEDE
+}
+
+enum OrderStatus{
+  PROCESSING
+  PAYMENT_PENDING 
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+  FAILED
 }
 
 

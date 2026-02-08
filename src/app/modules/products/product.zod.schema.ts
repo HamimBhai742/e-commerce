@@ -6,7 +6,6 @@ export const productSchema = z.object({
   shortDescription: z.string().optional(),
   price: z.number().nonnegative(),
   discountPrice: z.number().nonnegative().optional(),
-  sku: z.string().min(1),
   stock: z.number().int().nonnegative(),
   isInStock: z.boolean().default(true),
   status: z.enum(["active", "inactive", "deleted"]).default("active"),
