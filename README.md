@@ -1,6 +1,6 @@
 # E-Commerce Backend API
 
-A robust, production-ready E-commerce backend API built with **Express.js**, **TypeScript**, **Prisma ORM**, and **PostgreSQL**. This API provides user authentication, product management, and payment integration with Stripe.
+A robust, production-ready E-commerce backend API built with **Express.js**, **TypeScript**, **Prisma ORM**, and **PostgreSQL**. This API provides user authentication, product management, file uploads (Cloudinary), email (SMTP), and payment integration with Stripe.
 
 ---
 
@@ -23,20 +23,25 @@ A robust, production-ready E-commerce backend API built with **Express.js**, **T
 ## 📋 Tech Stack
 
 ### Core Dependencies
-- **Express.js** (v5.2.1) - Web framework
-- **TypeScript** (v5.9.3) - Type safety
-- **Prisma** (v7.3.0) - ORM for database management
-- **PostgreSQL** - Database (via Neon provider)
-- **Zod** (v4.3.6) - Schema validation
-- **JWT** (jsonwebtoken v9.0.3) - Token-based authentication
-- **bcryptjs** (v3.0.3) - Password hashing
-- **Stripe** (v20.3.1) - Payment processing
-- **CORS** (v2.8.6) - Cross-origin resource sharing
-- **Express Session** (v1.19.0) - Session management
+- **Express.js** - Web framework
+- **TypeScript** - Type safety
+- **Prisma** - ORM for database management
+- **PostgreSQL** (Neon) - Database
+- **Zod** - Schema validation
+- **jsonwebtoken** - JWT auth
+- **bcryptjs** - Password hashing
+- **Stripe** - Payment processing
+- **Cloudinary** + `multer-storage-cloudinary` - File uploads
+- **nodemailer** - SMTP email
+- **cors**, **express-session** - middleware utilities
 
 ### DevDependencies
-- **ts-node-dev** (v2.0.0) - Development server with hot reload
-- **TypeScript types** for type definitions
+- `ts-node-dev` — development server with hot reload
+- `prisma` — Prisma CLI for migrations and client generation
+
+### Scripts
+
+- `npm run dev` — start the dev server (`ts-node-dev --respawn --transpile-only src/server.ts`)
 
 ---
 
@@ -144,6 +149,15 @@ BCRYPT_SALT_ROUNDS=12
 JWT_ACCESS_SECRET="your-secret-key"
 JWT_ACCESS_EXPIRES_IN="1d"
 STRIPE_SECRET_KEY="your-stripe-key"
+CLOUDINARY_CLOUD_NAME="your_cloud_name"
+CLOUDINARY_API_KEY="your_api_key"
+CLOUDINARY_API_SECRET="your_api_secret"
+SMTP_HOST="smtp.example.com"
+SMTP_USER="your@email.com"
+SMTP_PASS="smtp-password"
+SMTP_PORT=465
+CLIENT_URL="http://localhost:3000"
+ROLE="admin"
 ```
 
 ### 4. Setup Database (Prisma)
@@ -152,7 +166,7 @@ STRIPE_SECRET_KEY="your-stripe-key"
 npx prisma generate
 
 # Run migrations
-npx prisma migrate deploy
+npx prisma migrate dev --name init
 
 # (Optional) Launch Prisma Studio to view database
 npx prisma studio
@@ -255,12 +269,21 @@ The application has comprehensive error handling:
 |----------|------|-------------|
 | `PORT` | number | Server port (default: 5000) |
 | `DATABASE_URL` | string | PostgreSQL connection string |
-| `ADMIN_EMAIL` | string | Default admin email |
-| `ADMIN_PASS` | string | Default admin password |
-| `BCRYPT_SALT_ROUNDS` | number | Password hashing rounds (default: 12) |
-| `JWT_ACCESS_SECRET` | string | Secret key for JWT signing |
-| `JWT_ACCESS_EXPIRES_IN` | string | Token expiration (e.g., "1d", "7d") |
-| `STRIPE_SECRET_KEY` | string | Stripe API key for payments |
+| `ADMIN_EMAIL` | string | Default admin email (seeding)
+| `ADMIN_PASS` | string | Default admin password (seeding)
+| `BCRYPT_SALT_ROUNDS` | number | Password hashing rounds (default: 12)
+| `JWT_ACCESS_SECRET` | string | Secret key for JWT signing
+| `JWT_ACCESS_EXPIRES_IN` | string | Token expiration (e.g., "1d", "7d")
+| `STRIPE_SECRET_KEY` | string | Stripe API key for payments
+| `CLOUDINARY_CLOUD_NAME` | string | Cloudinary cloud name for uploads
+| `CLOUDINARY_API_KEY` | string | Cloudinary API key
+| `CLOUDINARY_API_SECRET` | string | Cloudinary API secret
+| `SMTP_HOST` | string | SMTP host for outgoing email
+| `SMTP_USER` | string | SMTP username
+| `SMTP_PASS` | string | SMTP password
+| `SMTP_PORT` | number | SMTP port (465 for SSL)
+| `CLIENT_URL` | string | Frontend URL for OAuth/redirects
+| `ROLE` | string | Default role used by seeder (e.g. `admin`)
 
 ---
 
