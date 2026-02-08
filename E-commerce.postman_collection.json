@@ -1,0 +1,416 @@
+{
+  "info": {
+    "_postman_id": "cf5c16c0-4369-4994-aa20-b630c3b8ca19",
+    "name": "E-commerce",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "39080894"
+  },
+  "item": [
+    {
+      "name": "user",
+      "item": [
+        {
+          "name": "register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\":\"mdhamim3388@gmail.com\",\r\n    \"name\":\"Hamim\",\r\n    \"password\":\"Hamim@742\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/users/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"mdhamim3388@gmail.com\",\r\n    \"password\": \"Hamim@742\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "verify email",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"otp\":\"557964\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/auth/verify-otp/abba8444-5402-4c2b-9802-39adac195f26",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "verify-otp",
+                "abba8444-5402-4c2b-9802-39adac195f26"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "sent otp",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/auth/sent-otp",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "sent-otp"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "sent otp Copy",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/auth/forget-password",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "forget-password"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "product",
+      "item": [
+        {
+          "name": "create product",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/products/create",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "products",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/products",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "products"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "cart",
+      "item": [
+        {
+          "name": "add to cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFiYmE4NDQ0LTU0MDItNGMyYi05ODAyLTM5YWRhYzE5NWYyNiIsIm5hbWUiOiJIYW1pbSIsImVtYWlsIjoibWRoYW1pbTMzODhAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NzA1NDQ1NzQsImV4cCI6MTc3MDYzMDk3NH0.AlK6J7vQHn5JyoXOVCdMqbrjtO410dQUrVMapP7HGRs",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"productId\":\"2ef5f668-6cc5-4119-b0e4-d2bdcaef5af7\",\r\n    \"quantity\":1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/cart/add-to-cart",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "cart",
+                "add-to-cart"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get my cart item",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MjRiMGJjLWU1OGQtNDQ4Yi1iMGMyLTI5MTllZWUyZTY1NyIsIm5hbWUiOiJIYW1pbSIsImVtYWlsIjoibWRoYW1pbTMzODhAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NzA1MjU3NjksImV4cCI6MTc3MDYxMjE2OX0.eDhGQqD_jTJXkGv1GFkvppY6DfDJSUcCeOjJa3BXdCU",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/cart/my-cart",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "cart",
+                "my-cart"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "address",
+      "item": [
+        {
+          "name": "create address",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MjRiMGJjLWU1OGQtNDQ4Yi1iMGMyLTI5MTllZWUyZTY1NyIsIm5hbWUiOiJIYW1pbSIsImVtYWlsIjoibWRoYW1pbTMzODhAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NzA1MjU3NjksImV4cCI6MTc3MDYxMjE2OX0.eDhGQqD_jTJXkGv1GFkvppY6DfDJSUcCeOjJa3BXdCU",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"productId\":\"432cf33a-677c-4879-855d-ac2be3da5ac3\",\r\n    \"quantity\":2\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/address/create",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "address",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "my-addresses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMzZTdlZTkxLWYxNTMtNGI0Yi1hZjFhLWRiODk1ZDdiMDE2NiIsIm5hbWUiOiJIYW1pbSIsImVtYWlsIjoiZGFrb2tubzIzMEBnbWFpbC5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc3MDUyNzI2NiwiZXhwIjoxNzcwNjEzNjY2fQ.Bl8WO3Rrd2fNNpjEcPAOLIKuzUmjkYIlQajAzbbGqvM",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/address/my-addresses",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "address",
+                "my-addresses"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "order",
+      "item": [
+        {
+          "name": "create order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFiYmE4NDQ0LTU0MDItNGMyYi05ODAyLTM5YWRhYzE5NWYyNiIsIm5hbWUiOiJIYW1pbSIsImVtYWlsIjoibWRoYW1pbTMzODhAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NzA1NDQ1NzQsImV4cCI6MTc3MDYzMDk3NH0.AlK6J7vQHn5JyoXOVCdMqbrjtO410dQUrVMapP7HGRs",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"productId\":\"432cf33a-677c-4879-855d-ac2be3da5ac3\",\r\n    \"quantity\":2\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/v1/orders/create",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "my-addresses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMzZTdlZTkxLWYxNTMtNGI0Yi1hZjFhLWRiODk1ZDdiMDE2NiIsIm5hbWUiOiJIYW1pbSIsImVtYWlsIjoiZGFrb2tubzIzMEBnbWFpbC5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc3MDUyNzI2NiwiZXhwIjoxNzcwNjEzNjY2fQ.Bl8WO3Rrd2fNNpjEcPAOLIKuzUmjkYIlQajAzbbGqvM",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/v1/address/my-addresses",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "v1",
+                "address",
+                "my-addresses"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
