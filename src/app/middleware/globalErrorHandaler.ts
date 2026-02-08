@@ -17,7 +17,6 @@ export const globalErrorHandler = (
   if (err instanceof AppError) {
     statusCode = err.statusCode;
     message = err.message;
-    errorSource = err.errors || {};
   }
 
   // Zod validation error
@@ -56,8 +55,6 @@ export const globalErrorHandler = (
         errorSource["global"] = err.message;
     }
   }
-
-  console.error("💥 Error:", err);
 
   res.status(statusCode).json({
     success: false,
