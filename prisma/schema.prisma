@@ -20,8 +20,10 @@ model User{
   otp       String? 
   otpExpiresAt   DateTime?  
  review  Review[]
+ cart Cart[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  @@map("users")
 }
 
 
@@ -39,23 +41,20 @@ model Product {
   status           String   @default("active")
 
   thumbnail        String
-  images           String[]
 
   weight           Float?
   material         String?
 
-  categoryId       String
-  brandId          String?
-
   rating           Float    @default(0)
   reviewCount      Int      @default(0)
-  
+
+  cart Cart[]
+
   isFeatured       Boolean  @default(false)
-
   review            Review[]
-
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+  @@map("products")
 }
 
 model Review {
@@ -69,6 +68,21 @@ model Review {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   @@unique([productId,userId])
+  @@map("reviews")
+}
+
+
+model Cart{
+  id String @id @default(uuid())
+  productId String
+  product Product @relation(fields: [productId],references: [id])
+  userId String
+  user User @relation(fields: [userId],references: [id])
+  quantity Float @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([productId,userId])
+  @@map("carts")
 }
 
 

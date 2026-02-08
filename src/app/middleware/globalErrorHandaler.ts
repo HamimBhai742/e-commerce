@@ -3,52 +3,66 @@ import { ZodError } from "zod";
 import { Prisma } from "../../../generated/prisma/client";
 import { AppError } from "../error/custom.error";
 
-export const globalErrorHandler=(err:any,req:Request,res:Response,next:NextFunction)=>{
-     let statusCode = 500;
-     let message = 'Something went wrong!';
-     let errorSource: Record<string, any> = {};
+export const globalErrorHandler = (
+  err: any,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  let statusCode = 500;
+  let message = "Something went wrong!";
+  let errorSource: Record<string, string> = {};
 
-     // Check if the error is an AppError
-     if (err instanceof AppError) {
+  // AppError
+  if (err instanceof AppError) {
     statusCode = err.statusCode;
     message = err.message;
+    errorSource = err.errors || {};
   }
 
-     // Check if the error is a ZodError
-      if (err instanceof ZodError) {
+  // Zod validation error
+  else if (err instanceof ZodError) {
     statusCode = 400;
     message = "Validation error";
-
-      errorSource = err.issues.map(issue => ({
-      path: issue.path.length ? issue.path.join(".") : "body",
-      message: issue.message,
-    }));
+    err.issues.forEach(issue => {
+      const path = issue.path.length ? issue.path.join(".") : "body";
+      errorSource[path] = issue.message;
+    });
   }
 
-  // Check if the error is a Prisma error
-    else if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    if (err.code === "P2002") {
-      statusCode = 409;
-      message = "Duplicate value error";
-
-const field = (err.meta as any)?.driverAdapterError?.cause?.constraint?.fields?.[0]
-    
-errorSource = [
-        {
-          path: field || "unknown",
-          message: `${field} already exists`,
-        },
-      ];
+  // Prisma errors
+  else if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    switch (err.code) {
+      case "P2002": // Unique constraint failed
+        statusCode = 409;
+        message = "Duplicate value error";
+        const field = (err.meta as any)?.target?.[0] || "unknown";
+        errorSource[field] = `${field} already exists`;
+        break;
+      case "P2003": // Foreign key violation
+        statusCode = 400;
+        message = "Foreign key constraint failed";
+        const fkField = (err.meta as any)?.field_name || "unknown";
+        errorSource[fkField] = "Invalid reference";
+        break;
+      case "P2022": // Column not found
+        statusCode = 400;
+        message = "Column does not exist in database";
+        errorSource["global"] = "Database schema mismatch";
+        break;
+      default:
+        statusCode = 500;
+        message = err.message;
+        errorSource["global"] = err.message;
     }
   }
 
+  console.error("💥 Error:", err);
 
-
-  console.log(err)
-
-     res.status(statusCode).json({
-        success:false,
-        message,
-        errorSource
-     })
-}
+  res.status(statusCode).json({
+    success: false,
+    message,
+    errorSource,
+    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+  });
+};

@@ -1,4 +1,5 @@
 export class AppError extends Error{
+    [x: string]: {};
     public statusCode: number;
     constructor(statusCode: number, message: string) {
         super(message);

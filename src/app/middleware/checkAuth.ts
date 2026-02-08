@@ -25,7 +25,7 @@ const checkAuth = (...roles: string[]) => {
       // Check user is exist
       const user = await prisma.user.findUnique({
         where: {
-          id: verifyUserToken.userId,
+          id: verifyUserToken.id,
         },
       });
 
@@ -44,6 +44,7 @@ const checkAuth = (...roles: string[]) => {
       if (roles.length && !roles.includes(verifyUserToken.role)) {
         throw new AppError(httpStatus.FORBIDDEN, `You are not authorized! Only ${user.role=='admin' ? 'user' : 'admin'} can access this route`);
       }
+      
       req.user = verifyUserToken;
       next();
     } catch (error) {
