@@ -144,6 +144,7 @@ model Order{
 
 enum PaymentStatus{
   PENDING
+  CASH
   PAID
   FAILED
   CANCELLED

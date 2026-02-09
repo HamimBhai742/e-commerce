@@ -17,7 +17,9 @@ const createPaymentSession = async (amount: number, userId:string) => {
         ]
         ,
          success_url:'http://localhost:3000/success',
-            cancel_url:'http://localhost:3000/cancel'
+            cancel_url:'http://localhost:3000/cancel',
+            customer_creation:'always',
+            metadata:{userId}
     })
     console.log(session)
 
