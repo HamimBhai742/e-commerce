@@ -3,6 +3,5 @@ import { paymentController } from "./payment.controller";
 
 const router=Router()
 
-router.post('/create',paymentController.createPayment)
-
+router.post("/create-session",paymentController.createPaymentSession)
 export const paymentRoutes=router

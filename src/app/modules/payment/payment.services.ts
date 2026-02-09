@@ -1,10 +1,29 @@
-import { IPayment } from "../../interface/paymen"
-import { prisma } from "../../lib/prisma"
+import { stripe } from "../../lib/stripe";
 
-const createPayment=async(payload:IPayment,sub_total:number)=>{
+const createPaymentSession = async (amount: number, userId:string) => {
+   const session=await stripe.checkout.sessions.create({
+        mode:'payment'  ,
+        line_items:[
+            {
+                price_data:{
+                    currency:'bdt',
+                    unit_amount:amount*100,
+                    product_data:{
+                        name:'E-commerce payment'
+                    }
+                },
+                quantity:1
+            }
+        ]
+        ,
+         success_url:'http://localhost:3000/success',
+            cancel_url:'http://localhost:3000/cancel'
+    })
+    console.log(session)
 
-    const payment=await prisma.payment.create({data:{...payload,sub_total}})
-    return payment
-}
+  return session;
+};
 
-export const paymentServices={createPayment}
+export const paymentServices = {
+    createPaymentSession,
+};

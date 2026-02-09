@@ -26,6 +26,7 @@ model User{
   updatedAt DateTime @updatedAt
   @@map("users")
   orders Order[]
+  payments Payment[]
 }
 
 model Address{
@@ -46,6 +47,7 @@ model Address{
   updatedAt DateTime @updatedAt
 
   @@map("address")
+  orders Order[]
 }
 
 
@@ -114,6 +116,8 @@ model Payment{
   status PaymentStatus @default(PENDING)
   sub_total Float 
   orders Order[]
+  userId String
+  user User @relation(fields: [userId],references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@map("payments")
@@ -130,6 +134,8 @@ model Order{
   items String[]
   paymentId String
   payment Payment  @relation(fields: [paymentId],references: [id])
+  addressId String
+  address Address @relation(fields: [addressId],references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -141,7 +147,7 @@ enum PaymentStatus{
   PAID
   FAILED
   CANCELLED
-  REFUNEDE
+  REFUNDED
 }
 
 enum OrderStatus{

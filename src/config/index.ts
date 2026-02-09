@@ -44,4 +44,7 @@ export default {
     api_key: process.env.CLOUDINARY_API_KEY   as string,
     api_secret: process.env.CLOUDINARY_API_SECRET as string,
   },
+  stripe:{
+    secret_key: process.env.STRIPE_SECRET_KEY as string,
+  }
 };
