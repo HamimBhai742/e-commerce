@@ -27,6 +27,7 @@ export const createSubscriptionIntoDb = async (payload: CreatePlanPayload) => {
 
   let productId: string | undefined = undefined;
   let pricingId: string | undefined = undefined;
+  console.log(pricingId,productId)
 
   // Paid plan only
   if (payload.price > 0) {
@@ -36,20 +37,20 @@ export const createSubscriptionIntoDb = async (payload: CreatePlanPayload) => {
     const priceData: Stripe.PriceCreateParams = {
       unit_amount: Math.round(payload.price * 100),
       currency,
-      product: product.id,
+      product: productId!,
     };
-
+console.log(priceData)
     if (interval !== "lifetime") {
       priceData.recurring = { interval };
     }
 
     const price = await stripe.prices.create(priceData);
+        console.log(price,"ddddddd")
     pricingId = price.id;
+
   }
 
-  // Features JSON string হিসেবে save করা
-
-
+  // Features JSON string হিসেবে save করা হবে
   const duplicatePlan = await prisma.subscriptionPlan.findFirst({
     where: {
       name: payload.title
@@ -71,10 +72,11 @@ export const createSubscriptionIntoDb = async (payload: CreatePlanPayload) => {
       currency,
       billingPeriod: interval === "month" ? "MONTHLY" : "LIFETIME",
       features: payload.features,
-      productId, // now guaranteed string
+      productId,
       pricingId
     },
   });
+console.log(plan,'fdfvdfv')
 
   return plan;
 };

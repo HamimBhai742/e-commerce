@@ -6,6 +6,7 @@ import { cartRoutes } from "../modules/cart/cart.routes";
 import { addressRoutes } from "../modules/address/address.routes";
 import { orderRoutes } from "../modules/order/order.routes";
 import { paymentRoutes } from "../modules/payment/payment.routes";
+import { subscriptionRouter } from "../modules/stripe/stripe.route";
 
 const router =Router();
 
@@ -37,6 +38,10 @@ const routes=[
     {
         path:'/payments',
         route:paymentRoutes
+    },
+    {
+        path:'/subscriptions',
+        route:subscriptionRouter
     }
 ]
 

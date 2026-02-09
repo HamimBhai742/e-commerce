@@ -1,7 +1,6 @@
 import { Router } from "express";
 
 import { subscriptionController } from "./stripe.controller";
-import auth from "../../middlewares/auth";
 
 const router = Router();
 
@@ -13,10 +12,10 @@ router.get("/get-subscription",
   //  auth(),
     subscriptionController.getAllPlansController);
 router.post("/purchase-subscription",
-   auth(),
+  //  auth(),
     subscriptionController.purchaseSubscriptionController);
 router.post("/un-subscription",
-   auth(),
+  //  auth(),
     subscriptionController.unsubscribeSubscriptionController);
 
 export const subscriptionRouter = router;

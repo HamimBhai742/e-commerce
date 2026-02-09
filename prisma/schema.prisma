@@ -80,7 +80,6 @@ model Product {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   @@map("products")
-  subscriptionPlans SubscriptionPlan[]
 }
 
 model Review {
@@ -152,8 +151,7 @@ model SubscriptionPlan {
   billingPeriod String 
   features String[]
    productId String
-      pricingId String
-  product Product @relation(fields: [productId],references: [id])
+  pricingId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@map("subscription_plans")
