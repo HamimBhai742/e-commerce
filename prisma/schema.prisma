@@ -27,6 +27,7 @@ model User{
   @@map("users")
   orders Order[]
   payments Payment[]
+  userSubscriptions UserSubscription[]
 }
 
 model Address{
@@ -79,6 +80,7 @@ model Product {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   @@map("products")
+  subscriptionPlans SubscriptionPlan[]
 }
 
 model Review {
@@ -142,7 +144,52 @@ model Order{
   @@map("orders")
 }
 
-enum PaymentStatus{
+model SubscriptionPlan {
+  id String @id @default(uuid())
+  name String
+  price Float
+  currency String
+  billingPeriod String 
+  features String[]
+   productId String
+      pricingId String
+  product Product @relation(fields: [productId],references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("subscription_plans")
+  userSubscriptions UserSubscription[]
+}
+
+
+model UserSubscription {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId],references: [id])
+  planId String
+  plan SubscriptionPlan @relation(fields: [planId],references: [id])
+  status SubscriptionStatus @default(INACTIVE)
+  transactionId String?
+  paymentMethod String?
+  startDate DateTime?
+  endDate DateTime?
+
+  cancelAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, planId], name: "userId_planId_unique")
+  @@map("user_subscriptions")
+}
+
+enum SubscriptionStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+  CANCELLED
+  EXPIRED
+}
+
+enum PaymentStatus {
   PENDING
   CASH
   PAID
@@ -151,7 +198,7 @@ enum PaymentStatus{
   REFUNDED
 }
 
-enum OrderStatus{
+enum OrderStatus {
   PROCESSING
   PAYMENT_PENDING 
   CONFIRMED
@@ -166,7 +213,7 @@ enum OrderStatus{
 
 
 
-enum Role{
+enum Role {
   user
  admin
 }
