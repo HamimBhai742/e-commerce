@@ -119,9 +119,25 @@ model Payment{
   orders Order[]
   userId String
   user User @relation(fields: [userId],references: [id])
+  onlinePayId String?  @unique
+  onlinePay OnlinePayment? @relation(fields: [onlinePayId],references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@map("payments")
+}
+
+model OnlinePayment{
+  id String @id @default(uuid())
+  payment_method Payment_Method
+  amount Float
+  phone String
+  transactionId String @unique
+    payments Payment[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("online_payments")
+
 }
 
 
@@ -133,7 +149,7 @@ model Order{
   userId String
   user User @relation(fields: [userId],references: [id])
   items String[]
-  paymentId String
+  paymentId String   @unique
   payment Payment  @relation(fields: [paymentId],references: [id])
   addressId String
   address Address @relation(fields: [addressId],references: [id])
@@ -177,6 +193,13 @@ model UserSubscription {
 
   @@unique([userId, planId], name: "userId_planId_unique")
   @@map("user_subscriptions")
+}
+
+enum Payment_Method { 
+BKASH
+NAGAD
+ROCKET
+UPAY
 }
 
 enum SubscriptionStatus {

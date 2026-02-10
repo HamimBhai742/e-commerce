@@ -6,7 +6,7 @@ import httpStatus from "http-status";
 import { IJwtPayload } from "../../interface/user.interface";
 
 const createOrder=catchAsyncFn(async(req:Request &{user?:IJwtPayload},res:Response,next:NextFunction)=>{
-   const order=await orderServices.createOrder(req.user?.id as string,req.body.paymentId)
+   const order=await orderServices.createOrder(req.user?.id as string,req.body.addressId)
 
    sendResponse(res, { success:true, statusCode:httpStatus.CREATED, message:'Order created successfully', data:order})
 })
