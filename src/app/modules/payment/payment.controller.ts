@@ -3,10 +3,12 @@ import { catchAsyncFn } from "../../utils/catchAsyncFn";
 import { paymentServices } from "./payment.services";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
+import { IJwtPayload } from "../../interface/user.interface";
 
-const createPaymentSession=catchAsyncFn(async(req:Request,res:Response)=>{
+const createPaymentSession=catchAsyncFn(async(req:Request & {user?:IJwtPayload},res:Response)=>{
     const {amount,currency}=req.body
-    const session= await paymentServices.createPaymentSession(amount,currency)
+    const userId=req.user?.id as string
+    const session= await paymentServices.createPaymentSession(amount,userId,currency)
 
     sendResponse(res, {
         statusCode: httpStatus.CREATED,

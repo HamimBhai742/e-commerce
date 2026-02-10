@@ -19,7 +19,10 @@ const checkAuth = (...roles: string[]) => {
         token,
         config.jwt.access_secret as Secret,
       );
-
+      
+      if(!verifyUserToken){
+        throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid token!');
+      }
       console.log(verifyUserToken);
 
       // Check user is exist
