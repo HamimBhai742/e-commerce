@@ -55,6 +55,13 @@ export const globalErrorHandler = (
         errorSource["global"] = err.message;
     }
   }
+  
+// Prisma validation error
+  else if (err instanceof Prisma.PrismaClientValidationError) {
+  statusCode = 400;
+  message = "Prisma validation error";
+  errorSource["prisma"] = err.message;
+}
 
   res.status(statusCode).json({
     success: false,

@@ -7,6 +7,7 @@ import { addressRoutes } from "../modules/address/address.routes";
 import { orderRoutes } from "../modules/order/order.routes";
 import { paymentRoutes } from "../modules/payment/payment.routes";
 import { subscriptionRouter } from "../modules/stripe/stripe.route";
+import { adminRoutes } from "../modules/admin/admin.routes";
 
 const router =Router();
 
@@ -42,6 +43,10 @@ const routes=[
     {
         path:'/subscriptions',
         route:subscriptionRouter
+    },
+    {
+        path:'/admin',
+        route:adminRoutes
     }
 ]
 

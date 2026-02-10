@@ -20,3 +20,11 @@ export interface IJwtPayload{
     email:string;
     role:Role
 }
+
+export enum Userstatus {
+    ACTIVE="ACTIVE",
+    INACTIVE="INACTIVE",
+    BLOCKED="BLOCKED",
+    DELETED="DELETED"
+}
+  
