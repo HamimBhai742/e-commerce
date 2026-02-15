@@ -8,6 +8,9 @@ import { generateOTP } from "../../utils/generate.otp";
 import { sendEmail } from "../../utils/sendEmail";
 import { Secret } from "jsonwebtoken";
 import config from "../../../config";
+import { otpQueueEmail } from "../../bullMQ/init";
+import { forgetPassTempToken } from "../../utils/forgetPassTempToken";
+import { verifyToken } from "../../utils/verifyToken";
 
 const login=async(payload:ILoginPayload)=>{
     const user=await prisma.user.findUnique({where:{email:payload.email}})
@@ -63,7 +66,7 @@ const sendOtp=async(email:string)=>{
   
 }
 
-const verifyOTP = async (userId: string, inputOtp: string) => {
+const verifyRegistrationOTP = async (userId: string, inputOtp: string) => {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw new AppError(httpStatus.NOT_FOUND,"User not found");
   if (user.isVerified) throw new AppError( httpStatus.BAD_REQUEST,"User already verified");
@@ -77,6 +80,19 @@ const verifyOTP = async (userId: string, inputOtp: string) => {
     data: { isVerified: true, otp: null, otpExpiresAt: null },
   });
 
+  const loginLink = `${config.client_url}/login`;
+
+  await otpQueueEmail.add(
+    "registrationSuccess",
+    { userName: user.name, email: user.email,  subject: "Your Verification OTP" ,loginLink },
+    {
+      jobId: `${user.id}-${Date.now()}`,
+      removeOnComplete: true,
+      attempts: 3,
+      backoff: { type: "fixed", delay: 5000 },
+    }
+  );
+
   return { message: "User verified successfully" };
 };
 
@@ -86,30 +102,28 @@ const forgetPassword=async(email:string)=>{
     if(!user){
         throw new AppError(httpStatus.NOT_FOUND,'User not found')
     }
-  const token = createUserToken(user);
+  const token = forgetPassTempToken(user,'5m');
 
-  const resetUrl = `${config.client_url}/reset-password?token=${token.accessToken}&id=${user.id}`;
+  const resetUrl = `${config.client_url}/reset-password?token=${token.tempToken}&id=${user.id}`;
  
   return await prisma.$transaction(async (tx) => {
 
-   await  tx.user.update({
+    await  tx.user.update({
       where: { id: user.id },
       data: { otpExpiresAt: new Date(Date.now() + 2 * 60 * 1000) },
-    });
+     });
 
-     sendEmail({
-    to: user.email,
-    subject: 'Reset Password',
-    templateName: 'forgetPassword',
-    templateData: {
-        appName: 'Example App',
-      name: user.name,
-      resetUrl,
-      expiresIn: 2,
-      year: new Date().getFullYear(),
-      supportUrl:'https://support.example.com/support'
-    },
-  });
+  
+    await otpQueueEmail.add(
+      "forgetPassword",
+      { userName: user.name, email: user.email,resetLink: resetUrl, subject: "Reset Password Link" },
+      {
+        jobId: `${user.id}-${Date.now()}`,
+        removeOnComplete: true,
+        attempts: 3,
+        backoff: { type: "fixed", delay: 5000 },
+      }
+    );
 
   return {
     id: user.id,
@@ -118,16 +132,31 @@ const forgetPassword=async(email:string)=>{
   })
 }
 
-const resetPassword=async(id:string,password:string)=>{
-    const user=await prisma.user.findUnique({where:{id}})
+const resetPassword=async(token:string,password:string)=>{
+    if(!token || !password){
+        throw new AppError(httpStatus.BAD_REQUEST,'Invalid request')
+    }
+
+    const verifyForgetToken=await verifyToken(token,config.jwt.access_secret as Secret)
+
+    const user=await prisma.user.findUnique({where:{id:verifyForgetToken.id}})
     if(!user){
         throw new AppError(httpStatus.NOT_FOUND,'User not found')
     }
-    if(user.otpExpiresAt && user.otpExpiresAt < new Date()){
-        throw new AppError(httpStatus.BAD_REQUEST,'OTP expired')
-    }
+
     const hashedPass=await bcrypt.hash(password,config.bcrypt_salt_rounds)
-     await prisma.user.update({where:{id},data:{password:hashedPass,otpExpiresAt:null}})
+     await prisma.user.update({where:{id:user.id},data:{password:hashedPass}})
+
+     await otpQueueEmail.add(
+        "resetPasswordSuccess",
+        { userName: user.name, email: user.email, subject: "Password reset successfully" },
+        {
+          jobId: `${user.id}-${Date.now()}`,
+          removeOnComplete: true,
+          attempts: 3,
+          backoff: { type: "fixed", delay: 5000 },
+        }
+     )
      return{
         id:user.id,
         message:'Password reset successfully'
@@ -139,7 +168,7 @@ const resetPassword=async(id:string,password:string)=>{
 
 export const authServices={
     login,
-    verifyOTP,
+    verifyRegistrationOTP,
     sendOtp,
     forgetPassword,
     resetPassword

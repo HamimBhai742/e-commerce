@@ -14,7 +14,14 @@ const register=catchAsyncFn(async(req:Request,res:Response,next:NextFunction)=>{
     })
 })
 
+const resendRegistrationOtp=catchAsyncFn(async(req:Request,res:Response,next:NextFunction)=>{
+    const user=await userServices.resendRegistrationOtp(req.body.email)
+
+    sendResponse(res,{success:true,statusCode:200,message:user.message,data:user.id})
+})
+
 
 export const  userController={
-    register
+    register,
+    resendRegistrationOtp
 }

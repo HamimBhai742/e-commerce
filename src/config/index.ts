@@ -46,5 +46,10 @@ export default {
   },
   stripe:{
     secret_key: process.env.STRIPE_SECRET_KEY as string,
+  },  
+  redis:{
+    port:process.env.REDIS_PORT,
+    host:process.env.REDIS_HOST,
+    password:process.env.REDIS_PASSWORD
   }
 };

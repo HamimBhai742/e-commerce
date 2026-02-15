@@ -18,8 +18,8 @@ const sentOTP=catchAsyncFn(async(req:Request,res:Response,next:NextFunction)=>{
 })
 
 
-const verifyOTP=catchAsyncFn(async(req:Request,res:Response,next:NextFunction)=>{
-    const user=await authServices.verifyOTP(req.params.id as string,req.body.otp)
+const verifyRegistrationOTP=catchAsyncFn(async(req:Request,res:Response,next:NextFunction)=>{
+    const user=await authServices.verifyRegistrationOTP(req.params.id as string,req.body.otp)
 
     sendResponse(res,{success:true,statusCode:200,message:user.message,data:null})
 })
@@ -32,7 +32,7 @@ const forgetPassword=catchAsyncFn(async(req:Request,res:Response,next:NextFuncti
 })
 
 const resetPassword=catchAsyncFn(async(req:Request,res:Response,next:NextFunction)=>{
-    const user=await authServices.resetPassword(req.params.id as string,req.body.password)
+    const user=await authServices.resetPassword(req.query.token as string,req.body.password)
 
     sendResponse(res,{success:true,statusCode:httpStatus.OK,message:user.message,data:null})
 })
@@ -40,7 +40,7 @@ const resetPassword=catchAsyncFn(async(req:Request,res:Response,next:NextFunctio
 
 export const  authController={
     login,
-    verifyOTP,
+    verifyRegistrationOTP,
     sentOTP,
     forgetPassword,
     resetPassword

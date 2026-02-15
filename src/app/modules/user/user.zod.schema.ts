@@ -8,3 +8,8 @@ export const userSchema=z.object({
     isVerified:z.boolean().default(false),
     isDeleted:z.boolean().default(false)
 })
+
+
+export const resendOtpSchema=z.object({
+    email:z.email()
+})

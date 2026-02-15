@@ -9,7 +9,7 @@ const router=Router()
 
 router.post('/login',validateRequest(authSchema),authController.login)
 
-router.post('/verify-otp/:id',validateRequest(otpSchema),authController.verifyOTP)
+router.post('/verify-otp/:id',validateRequest(otpSchema),authController.verifyRegistrationOTP)
 
 router.post('/sent-otp',validateRequest(sentOtpSchema),authController.sentOTP)
 
