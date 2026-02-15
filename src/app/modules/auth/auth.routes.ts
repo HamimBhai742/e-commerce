@@ -15,6 +15,6 @@ router.post('/sent-otp',validateRequest(sentOtpSchema),authController.sentOTP)
 
 router.post('/forget-password',validateRequest(sentOtpSchema),authController.forgetPassword)
 
-router.post('/reset-password/:id', validateRequest(resetPassSchema), checkAuth(Role.USER),authController.resetPassword)
+router.post('/reset-password', validateRequest(resetPassSchema),authController.resetPassword)
 
 export const authRoutes=router

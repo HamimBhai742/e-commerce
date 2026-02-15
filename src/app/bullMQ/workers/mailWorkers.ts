@@ -73,6 +73,7 @@ export const otpEmailWorker = new Worker(
                     await registrationSuccessTemplate(userName, subject, email, loginLink);
                     return "Otp end job completed";
                 }
+                
             // handle verify
 
 
