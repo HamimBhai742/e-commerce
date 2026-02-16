@@ -85,15 +85,20 @@ const orderConfirmed = async (
         throw new AppError(httpStatus.BAD_REQUEST, "Promo Code Expired");
       if (promo.discount > cartTotal)
         throw new AppError(httpStatus.BAD_REQUEST, "Promo Code not valid");
-      if (promo.userId === userId)
+      const usedPromo = await prisma.usedPromo.findUnique({
+  where: {
+    promo_userId: {
+     userId,promo:promoCode
+    },
+  },
+});
+console.log(usedPromo)
+      if (usedPromo)
         throw new AppError(httpStatus.BAD_REQUEST, "Promo Code already used");
 
       cartTotal = cartTotal - (cartTotal * promo.discount) / 100;
 
-      await tx.promoCode.update({
-        where: { id: promo.id },
-        data: { userId },
-      });
+      await tx.usedPromo.create({data:{userId,promo:promoCode,discount:promo.discount}})
     }
 
     // 2️⃣ Calculate subtotal

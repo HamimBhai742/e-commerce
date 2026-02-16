@@ -68,20 +68,20 @@ return{
 
 const createPromoCode=async(payload:PromoPayload,userId:string)=>{
     await prisma.promoCode.create({
-        data:{
-            ...payload,
-            userId
-        }
+        data:payload
     })
     return {
         message:"Promo Code Created Successfully"
     }
 }
 
-const getAllPromoCodes=async(userId:string)=>{
-    const promocodes=await prisma.promoCode.findMany({
-        where:{userId}
-    })
+const getAllPromoCodes=async()=>{
+    const promocodes=await prisma.promoCode.findMany()
+    return promocodes
+}
+
+const getAllUsedPromoCodes=async()=>{
+    const promocodes=await prisma.usedPromo.findMany()
     return promocodes
 }
 
@@ -92,6 +92,7 @@ export const adminServices={
     manageOrder,
     managePayment,
     createPromoCode,
-    getAllPromoCodes
+    getAllPromoCodes,
+    getAllUsedPromoCodes
 }
 

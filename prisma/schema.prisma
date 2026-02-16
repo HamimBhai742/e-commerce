@@ -29,7 +29,7 @@ model User{
   orders Order[]
   payments Payment[]
   userSubscriptions UserSubscription[]
-  promoCodes PromoCode[]
+  usedPromos UsedPromo[]
 }
 
 model Address{
@@ -206,12 +206,22 @@ model PromoCode {
   discount Float @default(0)
   startDate DateTime
   expireDate DateTime
-  userId String? 
-  user User? @relation(fields: [userId],references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("promo_codes")
+}
+
+model UsedPromo{
+  id String @id @default(uuid())
+  promo String
+  discount Float @default(0)
+  userId String 
+  user User @relation(fields: [userId],references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("used_promo_codes")
   @@unique([promo, userId], name: "promo_userId")
 }
 

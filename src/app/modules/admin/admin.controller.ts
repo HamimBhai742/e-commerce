@@ -58,9 +58,8 @@ const createPromoCode = catchAsyncFn(
 );
 
 const getAllPromoCode = catchAsyncFn(
-  async (req: Request & { user?: any }, res: Response) => {
-    const { id } = req.user;
-    const user = await adminServices.getAllPromoCodes(id);
+  async (req: Request, res: Response) => {
+    const user = await adminServices.getAllPromoCodes();
 
     sendResponse(res, {
       success: true,
@@ -71,10 +70,24 @@ const getAllPromoCode = catchAsyncFn(
   },
 );
 
+
+const getAllUsedPromoCode = catchAsyncFn(
+  async (req: Request, res: Response) => {
+    const user = await adminServices.getAllUsedPromoCodes();
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Retrieved all promocodes successfully",
+      data: user,
+    });
+  },
+)
 export const adminController = {
   manageUser,
   manageOrder,
   managePayment,
   createPromoCode,
   getAllPromoCode,
+  getAllUsedPromoCode
 };

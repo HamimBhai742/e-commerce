@@ -12,5 +12,6 @@ router.patch('/manage-order',checkAuth(Role.ADMIN),adminController.manageOrder)
 router.patch('/manage-payment',checkAuth(Role.ADMIN),adminController.managePayment)
 router.post('/create-promo-code',checkAuth(Role.ADMIN),validateRequest(promoZodSchema),adminController.createPromoCode)
 router.get('/all-promo-codes',checkAuth(Role.ADMIN),adminController.getAllPromoCode)
+router.get('/all-used-promo-codes',checkAuth(Role.ADMIN),adminController.getAllUsedPromoCode)
 
 export const adminRoutes = router

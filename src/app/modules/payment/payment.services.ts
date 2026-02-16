@@ -130,18 +130,20 @@ const applyPromoCode=async(userId:string,promoCode:string)=>{
         where: { promo: promoCode },
       });
 
-      if (!promo)
-        throw new AppError(httpStatus.NOT_FOUND, "Promo Code does not exist");
-    if(promo.startDate > new Date())
-        throw new AppError(httpStatus.BAD_REQUEST, "Promo Code deal not started");
+     if (!promo)
+        throw new AppError(httpStatus.NOT_FOUND, "Promo Code not found");
       if (promo.expireDate < new Date())
         throw new AppError(httpStatus.BAD_REQUEST, "Promo Code Expired");
       if (promo.discount > cartTotal)
         throw new AppError(httpStatus.BAD_REQUEST, "Promo Code not valid");
-      if (promo.userId === userId)
+      const usedPromo=await prisma.usedPromo.findUnique({where:{promo_userId:{promo:promoCode,userId}}})
+      if (usedPromo)
         throw new AppError(httpStatus.BAD_REQUEST, "Promo Code already used");
-let discount=Number(cartTotal * promo.discount / 100)
+
+      let discount = (cartTotal * promo.discount) / 100;
       cartTotal = cartTotal - discount;
+
+      await prisma.usedPromo.create({data:{userId,promo:promoCode,discount:promo.discount}})
 console.log(cartTotal,discount)
     //   await tx.promoCode.update({
     //     where: { id: promo.id },
