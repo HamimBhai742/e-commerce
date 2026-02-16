@@ -88,7 +88,7 @@ const orderConfirmed = async (
       if (promo.userId === userId)
         throw new AppError(httpStatus.BAD_REQUEST, "Promo Code already used");
 
-      cartTotal = cartTotal - cartTotal * promo.discount / 100;
+      cartTotal = cartTotal - (cartTotal * promo.discount) / 100;
 
       await tx.promoCode.update({
         where: { id: promo.id },
