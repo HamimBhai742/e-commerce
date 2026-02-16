@@ -29,6 +29,7 @@ model User{
   orders Order[]
   payments Payment[]
   userSubscriptions UserSubscription[]
+  promoCodes PromoCode[]
 }
 
 model Address{
@@ -197,6 +198,21 @@ model UserSubscription {
 
   @@unique([userId, planId], name: "userId_planId_unique")
   @@map("user_subscriptions")
+}
+
+model PromoCode {
+  id String @id @default(uuid())
+  promo String 
+  discount Float @default(0)
+  expireDate DateTime
+  isUsed Boolean @default(false)
+  userId String? 
+  user User? @relation(fields: [userId],references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("promo_codes")
+  @@unique([promo, userId], name: "promo_userId")
 }
 
 enum Payment_Method { 

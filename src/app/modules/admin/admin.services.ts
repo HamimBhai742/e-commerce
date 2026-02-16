@@ -1,4 +1,5 @@
 import { OrderStatus, PaymentStatus } from "../../../../generated/prisma/enums"
+import { PromoPayload } from "../../interface/promo"
 import { Userstatus } from "../../interface/user.interface"
 import { prisma } from "../../lib/prisma"
 
@@ -63,13 +64,34 @@ await prisma.payment.update({
 return{
     message:`Payment ${status} Successfully`
 }
-}   
+}  
+
+const createPromoCode=async(payload:PromoPayload,userId:string)=>{
+    await prisma.promoCode.create({
+        data:{
+            ...payload,
+            userId
+        }
+    })
+    return {
+        message:"Promo Code Created Successfully"
+    }
+}
+
+const getAllPromoCodes=async(userId:string)=>{
+    const promocodes=await prisma.promoCode.findMany({
+        where:{userId}
+    })
+    return promocodes
+}
 
 
 export const adminServices={
     manageUser,
     getAllUsers,
     manageOrder,
-    managePayment
+    managePayment,
+    createPromoCode,
+    getAllPromoCodes
 }
 
