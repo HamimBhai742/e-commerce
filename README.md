@@ -1,1081 +1,292 @@
 # E-Commerce Backend API
 
-A robust, production-ready E-commerce backend API built with **Express.js**, **TypeScript**, **Prisma ORM**, and **PostgreSQL**. This comprehensive API provides user authentication, product management, shopping cart, order processing, payment integration (Stripe, bKash, Nagad), file uploads (Cloudinary), email notifications (SMTP), subscription management, and admin functionality.
+A full-featured e-commerce backend built with Node.js, Express, TypeScript, Prisma, and PostgreSQL. This API provides comprehensive functionality for managing products, orders, payments, subscriptions, and user authentication.
 
----
+## Features
 
-## 🚀 Features
+- **User Management**: Registration, authentication, profile management with role-based access control
+- **Product Management**: CRUD operations, inventory tracking, ratings, and reviews
+- **Shopping Cart**: Add/remove items, quantity management, real-time pricing
+- **Order Processing**: Complete order lifecycle from creation to delivery
+- **Payment Integration**: 
+  - Multiple payment methods (Bkash, Nagad, Rocket, Upay)
+  - Stripe integration for subscriptions
+  - Payment status tracking
+- **Address Management**: Multiple shipping addresses with default selection
+- **Subscription Plans**: Recurring billing with Stripe
+- **Promo Codes**: Discount management and usage tracking
+- **Email Notifications**: Automated emails using BullMQ and Nodemailer
+- **Image Upload**: Cloudinary integration for product images
+- **Rate Limiting**: Redis-based request throttling
+- **Security**: JWT authentication, bcrypt password hashing, input validation with Zod
 
-- ✅ **User Authentication & Authorization** - JWT-based authentication with secure password hashing (bcryptjs)
-- ✅ **User Management** - Registration, login, profile management with role-based access control
-- ✅ **Product Catalog** - Full product management with inventory, pricing, descriptions, and featured products
-- ✅ **Shopping Cart** - Add/remove products, manage quantities, calculate totals
-- ✅ **Order Management** - Order creation, tracking, multiple order statuses, order history
-- ✅ **Payment Integration** - Stripe API + Multiple local payment methods (bKash, Nagad, Rocket, uPay)
-- ✅ **File Upload** - Cloudinary integration for product images and attachments
-- ✅ **Email Notifications** - SMTP integration for transactional emails and notifications
-- ✅ **User Addresses** - Multiple address management with default address selection
-- ✅ **Product Reviews** - User reviews and ratings system
-- ✅ **Subscription Plans** - Subscription management with multiple billing periods
-- ✅ **Input Validation** - Zod schema validation for all request payloads
-- ✅ **Error Handling** - Comprehensive global error handling with detailed error responses
-- ✅ **CORS Support** - Configured for development and production environments
-- ✅ **Admin Features** - Automatic admin user seeding on first startup
-- ✅ **Database ORM** - Prisma with PostgreSQL (Neon) for type-safe database operations
-- ✅ **Graceful Shutdown** - Proper server cleanup and error recovery
-- ✅ **Rate Limiting** - Request rate limiting to prevent abuse
-- ✅ **Queue Processing** - BullMQ integration for async job processing
-- ✅ **Redis Caching** - Redis integration for session management and caching
+## Tech Stack
 
----
+- **Runtime**: Node.js with TypeScript
+- **Framework**: Express.js
+- **Database**: PostgreSQL with Prisma ORM
+- **Caching**: Redis (IORedis)
+- **Queue**: BullMQ for background jobs
+- **Payment**: Stripe
+- **File Upload**: Cloudinary
+- **Email**: Nodemailer with EJS templates
+- **Validation**: Zod
+- **Authentication**: JWT + bcrypt
 
-## 📋 Tech Stack
-
-### Core Dependencies
-- **Express.js** (v5.2.1) - Web framework
-- **TypeScript** (v5.9.3) - Type safety and modern JavaScript features
-- **Prisma** (v7.3.0) - Type-safe ORM with PostgreSQL adapter
-- **PostgreSQL** (Neon) - Primary database
-- **Zod** (v4.3.6) - Schema validation and data parsing
-- **jsonwebtoken** (v9.0.3) - JWT authentication
-- **bcryptjs** (v3.0.3) - Secure password hashing
-- **Stripe** (v20.3.1) - Payment processing
-- **Cloudinary** (v1.41.3) + `multer-storage-cloudinary` - Cloud file uploads
-- **Multer** (v2.0.2) - File upload middleware
-- **Nodemailer** (v8.0.1) - SMTP email service
-- **ioredis** (v5.9.2) - Redis client for caching and sessions
-- **BullMQ** (v5.69.2) - Job queue processing
-- **rate-limiter-flexible** (v9.1.1) - Rate limiting middleware
-- **slugify** (v1.6.6) - URL-friendly slug generation
-- **express-session** (v1.19.0) - Session management
-- **CORS** (v2.8.6) - Cross-origin resource sharing
-- **EJS** (v4.0.1) - Template engine for email templates
-- **pg** (v8.18.0) - PostgreSQL client
-
-### DevDependencies
-- **ts-node-dev** (v2.0.0) - Development server with hot reload
-- **@types/* packages** - TypeScript type definitions for all dependencies
-
-### Scripts
-```json
-{
-  "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
-}
-```
-
----
-
-## 📁 Project Structure
+## Project Structure
 
 ```
-e-commerce/
-├── src/
-│   ├── app.ts                          # Express app configuration
-│   ├── server.ts                       # Server entry point
-│   ├── config/
-│   │   └── index.ts                    # Configuration & environment variables
-│   └── app/
-│       ├── DB/
-│       │   └── connect.db.ts           # Database connection setup
-│       ├── error/
-│       │   └── custom.error.ts         # Custom error handling classes
-│       ├── interface/
-│       │   ├── login.interface.ts      # Login DTO
-│       │   └── user.interface.ts       # User DTO
-│       ├── lib/
-│       │   └── prisma.ts               # Prisma client instance
-│       ├── middleware/
-│       │   ├── globalErrorHandaler.ts  # Global error handler
-│       │   └── validatedRequest.ts     # Request validation middleware
-│       ├── bullMQ/                     # Job queue configuration
-│       ├── modules/
-│       │   ├── address/                # User addresses module
-│       │   │   ├── address.controller.ts
-│       │   │   ├── address.routes.ts
-│       │   │   └── address.services.ts
-│       │   ├── admin/                  # Admin module
-│       │   ├── auth/                   # Authentication module
-│       │   │   ├── auth.controller.ts
-│       │   │   ├── auth.routes.ts
-│       │   │   ├── auth.services.ts
-│       │   │   └── auth.zod.schema.ts
-│       │   ├── cart/                   # Shopping cart module
-│       │   │   ├── cart.controller.ts
-│       │   │   ├── cart.routes.ts
-│       │   │   └── cart.services.ts
-│       │   ├── order/                  # Order management module
-│       │   │   ├── order.controller.ts
-│       │   │   ├── order.routes.ts
-│       │   │   └── order.services.ts
-│       │   ├── payment/                # Payment processing module
-│       │   │   ├── payment.controller.ts
-│       │   │   ├── payment.routes.ts
-│       │   │   └── payment.services.ts
-│       │   ├── products/               # Product management module
-│       │   │   ├── products.controller.ts
-│       │   │   ├── products.routes.ts
-│       │   │   └── products.services.ts
-│       │   ├── stripe/                 # Stripe integration module
-│       │   │   ├── stripe.controller.ts
-│       │   │   ├── stripe.routes.ts
-│       │   │   └── stripe.services.ts
-│       │   └── user/                   # User management module
-│       │       ├── user.controller.ts
-│       │       ├── user.routes.ts
-│       │       ├── user.services.ts
-│       │       └── user.zod.schema.ts
-│       ├── routes/
-│       │   └── index.ts                # API routes aggregator
-│       └── utils/
-│           ├── catchAsyncFn.ts         # Async error wrapper
-│           ├── createUserToken.ts      # JWT token creation utility
-│           ├── seedAdmin.ts            # Admin user seeding utility
-│           └── sendResponse.ts         # Standard response formatting
-├── prisma/
-│   ├── schema.prisma                   # Database schema (249 lines)
-│   └── migrations/                     # Database migration history
-├── generated/
-│   └── prisma/                         # Generated Prisma Client
-├── package.json                        # Dependencies and scripts
-├── tsconfig.json                       # TypeScript configuration
-├── prisma.config.ts                    # Prisma CLI configuration
-├── .env                                # Environment variables (not in repo)
-├── E-commerce.postman_collection.json  # Postman API collection
-└── README.md                           # This file
+src/
+├── app/
+│   ├── bullMQ/           # Background job processing
+│   │   ├── queues/       # Job queues (email, etc.)
+│   │   └── workers/      # Job workers
+│   ├── DB/               # Database connection
+│   ├── error/            # Custom error handlers
+│   ├── interface/        # TypeScript interfaces
+│   ├── lib/              # Third-party integrations
+│   │   ├── cloudinary.ts
+│   │   ├── prisma.ts
+│   │   ├── stripe.ts
+│   │   └── redis/
+│   ├── middleware/       # Express middleware
+│   │   ├── checkAuth.ts
+│   │   ├── dailyLimit.ts
+│   │   ├── globalErrorHandaler.ts
+│   │   └── validatedRequest.ts
+│   ├── modules/          # Feature modules
+│   │   ├── address/
+│   │   ├── admin/
+│   │   ├── auth/
+│   │   ├── cart/
+│   │   ├── order/
+│   │   ├── payment/
+│   │   ├── products/
+│   │   ├── stripe/
+│   │   └── user/
+│   ├── routes/           # API routes
+│   └── utils/            # Utility functions
+├── config/               # Configuration
+├── app.ts               # Express app setup
+└── server.ts            # Server entry point
 ```
 
----
+## Database Schema
 
-## 🗄️ Database Schema
+The application uses the following main models:
 
-### Core Models
+- **User**: User accounts with roles (user/admin)
+- **Product**: Product catalog with inventory
+- **Cart**: Shopping cart items
+- **Order**: Order management
+- **Payment**: Payment tracking
+- **OnlinePayment**: Mobile payment details
+- **Address**: Shipping addresses
+- **Review**: Product reviews
+- **SubscriptionPlan**: Subscription offerings
+- **UserSubscription**: User subscription records
+- **PromoCode**: Discount codes
+- **UsedPromo**: Promo code usage tracking
 
-#### **User Model**
-```prisma
-model User {
-  id                String    @id @default(uuid())
-  name              String
-  email             String    @unique
-  password          String
-  role              Role      @default(user)
-  status            UserStatus @default(ACTIVE)
-  isVerified        Boolean   @default(false)
-  isDeleted         Boolean   @default(false)
-  otp               String?
-  otpExpiresAt      DateTime?
-  
-  // Relations
-  reviews           Review[]
-  carts             Cart[]
-  addresses         Address[]
-  orders            Order[]
-  payments          Payment[]
-  subscriptions     UserSubscription[]
-  
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
-  @@map("users")
-}
-
-enum UserStatus {
-  ACTIVE
-  INACTIVE
-  BLOCKED
-  DELETED
-}
-
-enum Role {
-  user
-  admin
-}
-```
-
-#### **Product Model**
-```prisma
-model Product {
-  id                String    @id @default(uuid())
-  name              String
-  slug              String    @unique
-  description       String
-  shortDescription  String?
-  price             Float
-  discountPrice     Float?
-  sku               String    @unique
-  stock             Int
-  isInStock         Boolean   @default(true)
-  status            String    @default("active")
-  thumbnail         String
-  weight            Float?
-  material          String?
-  rating            Float     @default(0)
-  reviewCount       Int       @default(0)
-  isFeatured        Boolean   @default(false)
-  
-  // Relations
-  carts             Cart[]
-  reviews           Review[]
-  
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
-  @@map("products")
-}
-```
-
-#### **Cart Model**
-```prisma
-model Cart {
-  id                String    @id @default(uuid())
-  productId         String
-  userId            String
-  quantity          Float     @default(1)
-  amount            Float
-  
-  // Relations
-  product           Product   @relation(fields: [productId], references: [id])
-  user              User      @relation(fields: [userId], references: [id])
-  
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
-  @@unique([productId, userId])
-  @@map("carts")
-}
-```
-
-#### **Order Model**
-```prisma
-model Order {
-  id                String    @id @default(uuid())
-  order_number      String    @unique
-  total_amount      Float
-  status            OrderStatus @default(PAYMENT_PENDING)
-  items             String[]
-  
-  // Relations
-  userId            String
-  user              User      @relation(fields: [userId], references: [id])
-  paymentId         String    @unique
-  payment           Payment   @relation(fields: [paymentId], references: [id])
-  addressId         String
-  address           Address   @relation(fields: [addressId], references: [id])
-  
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
-  @@map("orders")
-}
-
-enum OrderStatus {
-  PROCESSING
-  PAYMENT_PENDING
-  CONFIRMED
-  SHIPPED
-  DELIVERED
-  CANCELLED
-  REFUNDED
-  FAILED
-}
-```
-
-#### **Payment Model**
-```prisma
-model Payment {
-  id                String    @id @default(uuid())
-  status            PaymentStatus @default(PENDING)
-  sub_total         Float
-  
-  // Relations
-  userId            String
-  user              User      @relation(fields: [userId], references: [id])
-  onlinePayId       String?   @unique
-  onlinePay         OnlinePayment? @relation(fields: [onlinePayId], references: [id])
-  orders            Order[]
-  
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
-  @@map("payments")
-}
-
-enum PaymentStatus {
-  PENDING
-  CASH
-  PAID
-  FAILED
-  CANCELLED
-  REFUNDED
-}
-```
-
-#### **Address Model**
-```prisma
-model Address {
-  id                String    @id @default(uuid())
-  aptNumber         String
-  aptName           String
-  street            String
-  sub_district      String
-  district          String
-  postalCode        String
-  phone             String    @unique
-  address           String?
-  isDefault         Boolean   @default(false)
-  
-  // Relations
-  userId            String
-  user              User      @relation(fields: [userId], references: [id])
-  orders            Order[]
-  
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
-  @@map("address")
-}
-```
-
-#### **Review Model**
-```prisma
-model Review {
-  id                String    @id @default(uuid())
-  review            String
-  
-  // Relations
-  userId            String
-  user              User      @relation(fields: [userId], references: [id])
-  productId         String
-  product           Product   @relation(fields: [productId], references: [id])
-  
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
-  @@unique([productId, userId])
-  @@map("reviews")
-}
-```
-
-#### **Subscription Models**
-```prisma
-model SubscriptionPlan {
-  id                String    @id @default(uuid())
-  name              String
-  price             Float
-  currency          String
-  billingPeriod     String
-  features          String[]
-  productId         String
-  pricingId         String
-  
-  // Relations
-  userSubscriptions UserSubscription[]
-  
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
-  @@map("subscription_plans")
-}
-
-model UserSubscription {
-  id                String    @id @default(uuid())
-  status            SubscriptionStatus @default(INACTIVE)
-  transactionId     String?
-  paymentMethod     String?
-  startDate         DateTime?
-  endDate           DateTime?
-  cancelAt          DateTime?
-  
-  // Relations
-  userId            String
-  user              User      @relation(fields: [userId], references: [id])
-  planId            String
-  plan              SubscriptionPlan @relation(fields: [planId], references: [id])
-  
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
-  @@unique([userId, planId], name: "userId_planId_unique")
-  @@map("user_subscriptions")
-}
-
-enum SubscriptionStatus {
-  PENDING
-  ACTIVE
-  INACTIVE
-  CANCELLED
-  EXPIRED
-}
-```
-
-#### **Online Payment Model**
-```prisma
-model OnlinePayment {
-  id                String    @id @default(uuid())
-  payment_method    Payment_Method
-  amount            Float
-  phone             String
-  transactionId     String    @unique
-  
-  // Relations
-  payments          Payment[]
-  
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
-  @@map("online_payments")
-}
-
-enum Payment_Method {
-  BKASH
-  NAGAD
-  ROCKET
-  UPAY
-}
-```
-
----
-
-## 🔧 Setup & Installation
+## Getting Started
 
 ### Prerequisites
-- **Node.js** v18+ and **npm** or **yarn**
-- **PostgreSQL** database (Neon recommended for cloud)
-- **Redis** instance (for caching and sessions)
-- **Cloudinary** account (for file uploads)
-- **Stripe** account (for payment processing)
-- **SMTP** email service credentials
 
-### 1. Clone the Repository
+- Node.js (v16 or higher)
+- PostgreSQL database
+- Redis server
+- Cloudinary account
+- Stripe account
+
+### Installation
+
+1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd e-commerce
+cd <project-directory>
 ```
 
-### 2. Install Dependencies
+2. Install dependencies:
 ```bash
 npm install
 ```
 
-### 3. Configure Environment Variables
-Create a `.env` file in the root directory:
+3. Set up environment variables:
+Create a `.env` file in the root directory with the following variables:
 
 ```env
-# Server
 PORT=5000
-NODE_ENV=development
 
 # Database
-DATABASE_URL="postgresql://username:password@host:port/database"
+DATABASE_URL="postgresql://user:password@host:port/database"
 
-# JWT
-JWT_ACCESS_SECRET="your-jwt-secret-key-min-32-chars-long"
-JWT_ACCESS_EXPIRES_IN="1d"
-
-# Admin Seeding
+# Admin Credentials
 ADMIN_EMAIL="admin@example.com"
-ADMIN_PASS="SecurePassword123!"
+ADMIN_PASS="your-secure-password"
 BCRYPT_SALT_ROUNDS=12
 ROLE="admin"
 
-# Email (SMTP)
+# JWT
+JWT_ACCESS_SECRET="your-jwt-secret"
+JWT_ACCESS_EXPIRES_IN="1d"
+
+# SMTP Configuration
 SMTP_HOST="smtp.gmail.com"
 SMTP_USER="your-email@gmail.com"
-SMTP_PASS="your-app-specific-password"
-SMTP_PORT=465
-CLIENT_URL="http://localhost:3000"
+SMTP_PASS="your-app-password"
+SMTP_PORT="465"
 
-# Cloud Storage (Cloudinary)
-CLOUDINARY_CLOUD_NAME="your_cloud_name"
-CLOUDINARY_API_KEY="your_api_key"
-CLOUDINARY_API_SECRET="your_api_secret"
+# Client URL
+CLIENT_URL="http://localhost:5000/api/v1/auth"
 
-# Payment (Stripe)
-STRIPE_SECRET_KEY="sk_test_xxxxxxxxxxxxx"
+# Cloudinary
+CLOUDINARY_CLOUD_NAME="your-cloud-name"
+CLOUDINARY_API_KEY="your-api-key"
+CLOUDINARY_API_SECRET="your-api-secret"
+
+# Stripe
+STRIPE_SECRET_KEY="your-stripe-secret-key"
 
 # Redis
-REDIS_HOST="redis-server.example.com"
+REDIS_HOST="your-redis-host"
 REDIS_PORT=6379
-REDIS_PASSWORD="optional-password"
+REDIS_PASSWORD="your-redis-password"
 ```
 
-### 4. Setup Database
+4. Run database migrations:
 ```bash
-# Generate Prisma Client
-npx prisma generate
-
-# Run migrations
-npx prisma migrate dev
-
-# (Optional) View and manage database visually
-npx prisma studio
-```
-
-### 5. Start Development Server
-```bash
-npm run dev
-```
-
-Server will start on `http://localhost:5000`
-
----
-
-## 🔌 API Endpoints
-
-### Base URL
-```
-http://localhost:5000/api/v1
-```
-
-### Authentication Module (`/auth`)
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/auth/login` | User login | ❌ |
-| POST | `/auth/logout` | User logout | ✅ |
-| POST | `/auth/refresh` | Refresh access token | ✅ |
-| POST | `/auth/verify-email` | Verify email with OTP | ❌ |
-| POST | `/auth/resend-otp` | Resend OTP to email | ❌ |
-
-### User Module (`/user`)
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/user/register` | User registration | ❌ |
-| GET | `/user/profile` | Get user profile | ✅ |
-| PATCH | `/user/profile` | Update user profile | ✅ |
-| DELETE | `/user/account` | Delete user account | ✅ |
-| POST | `/user/change-password` | Change password | ✅ |
-| POST | `/user/forgot-password` | Request password reset | ❌ |
-| POST | `/user/reset-password` | Reset password with token | ❌ |
-
-### Products Module (`/products`)
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/products` | List all products (paginated) | ❌ |
-| GET | `/products/:id` | Get product details | ❌ |
-| GET | `/products/featured` | Get featured products | ❌ |
-| GET | `/products/search?q=term` | Search products | ❌ |
-| POST | `/products` | Create new product | ✅ (Admin) |
-| PATCH | `/products/:id` | Update product | ✅ (Admin) |
-| DELETE | `/products/:id` | Delete product | ✅ (Admin) |
-
-### Cart Module (`/cart`)
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/cart` | Get user cart | ✅ |
-| POST | `/cart` | Add product to cart | ✅ |
-| PATCH | `/cart/:cartId` | Update cart item quantity | ✅ |
-| DELETE | `/cart/:cartId` | Remove item from cart | ✅ |
-| DELETE | `/cart` | Clear entire cart | ✅ |
-
-### Order Module (`/order`)
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/order` | Create new order | ✅ |
-| GET | `/order` | Get user orders | ✅ |
-| GET | `/order/:orderId` | Get order details | ✅ |
-| PATCH | `/order/:orderId/status` | Update order status | ✅ (Admin) |
-| GET | `/order/admin/all` | Get all orders | ✅ (Admin) |
-
-### Payment Module (`/payment`)
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/payment/initiate` | Initiate payment | ✅ |
-| POST | `/payment/confirm` | Confirm payment | ✅ |
-| GET | `/payment/history` | Get payment history | ✅ |
-| POST | `/payment/refund/:paymentId` | Request refund | ✅ (Admin) |
-
-### Stripe Module (`/stripe`)
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/stripe/checkout` | Create Stripe checkout session | ✅ |
-| POST | `/stripe/webhook` | Handle Stripe webhooks | ❌ |
-| GET | `/stripe/session/:sessionId` | Get session details | ✅ |
-
-### Address Module (`/address`)
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/address` | Get user addresses | ✅ |
-| POST | `/address` | Add new address | ✅ |
-| PATCH | `/address/:addressId` | Update address | ✅ |
-| DELETE | `/address/:addressId` | Delete address | ✅ |
-| PATCH | `/address/:addressId/default` | Set as default address | ✅ |
-
-### Admin Module (`/admin`)
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/admin/dashboard` | Dashboard statistics | ✅ (Admin) |
-| GET | `/admin/users` | List all users | ✅ (Admin) |
-| GET | `/admin/orders` | List all orders | ✅ (Admin) |
-| GET | `/admin/payments` | List all payments | ✅ (Admin) |
-| PATCH | `/admin/users/:userId` | Update user status | ✅ (Admin) |
-
----
-
-## 🔐 Authentication
-
-The API uses **JWT (JSON Web Tokens)** for stateless authentication:
-
-### Authentication Flow
-
-```
-1. User Registration (/user/register)
-   ↓ Validate input with Zod
-   ↓ Hash password with bcryptjs (salt rounds: 12)
-   ↓ Generate OTP for email verification
-   ↓ Send OTP via SMTP
-   ↓ Return success response
-
-2. Email Verification (/auth/verify-email)
-   ↓ Validate OTP
-   ↓ Mark user as verified
-   ↓ Return verification status
-
-3. User Login (/auth/login)
-   ↓ Validate credentials
-   ↓ Generate JWT token (expires: 1 day)
-   ↓ Set secure HTTP-only cookie (optional)
-   ↓ Return token and user data
-
-4. Protected Requests
-   ↓ Include: Authorization: Bearer <token>
-   ↓ Middleware verifies token
-   ↓ Extract user from token claim
-   ↓ Proceed to route handler
-```
-
-### Headers Required
-```http
-Authorization: Bearer <your-jwt-token>
-Content-Type: application/json
-```
-
-### Token Claims
-```json
-{
-  "id": "user-uuid",
-  "email": "user@example.com",
-  "role": "user",
-  "status": "ACTIVE",
-  "iat": 1234567890,
-  "exp": 1234654290
-}
-```
-
-### Password Security
-- Passwords hashed using **bcryptjs** with 12 salt rounds
-- No plain text passwords stored in database
-- Secure password reset flow with token validation
-- OTP-based verification for sensitive operations
-
----
-
-## 📝 Request/Response Format
-
-### Success Response
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "message": "Operation successful",
-  "data": {
-    // Response payload
-  }
-}
-```
-
-### Error Response
-```json
-{
-  "success": false,
-  "statusCode": 400,
-  "message": "Validation failed",
-  "errorSource": [
-    {
-      "path": "email",
-      "message": "Invalid email format"
-    },
-    {
-      "path": "password",
-      "message": "Password must be at least 8 characters"
-    }
-  ]
-}
-```
-
-### HTTP Status Codes
-| Code | Meaning | Usage |
-|------|---------|-------|
-| 200 | OK | Successful GET/PATCH request |
-| 201 | Created | Successful POST request |
-| 400 | Bad Request | Validation errors, malformed request |
-| 401 | Unauthorized | Missing/invalid authentication token |
-| 403 | Forbidden | User lacks required permissions |
-| 404 | Not Found | Resource does not exist |
-| 409 | Conflict | Duplicate entry (e.g., email already exists) |
-| 422 | Unprocessable Entity | Semantic validation failure |
-| 500 | Server Error | Internal server error |
-
----
-
-## 🛡️ Error Handling
-
-### Error Types & Handling
-
-1. **Validation Errors (Zod)**
-   - HTTP 400
-   - Field-specific error messages
-   - Detailed path information
-
-2. **Database Errors (Prisma)**
-   - P2002: Unique constraint violation → 409 Conflict
-   - P2025: Record not found → 404 Not Found
-   - P2003: Foreign key constraint → 400 Bad Request
-   - Generic errors → 500 Internal Server Error
-
-3. **Async Errors**
-   - Wrapped with `catchAsyncFn` utility
-   - Forwarded to global error handler
-   - Proper error logging
-
-4. **Authentication Errors**
-   - Invalid token → 401 Unauthorized
-   - Expired token → 401 Unauthorized
-   - Missing authorization header → 401 Unauthorized
-
-5. **Authorization Errors**
-   - Insufficient permissions → 403 Forbidden
-   - Admin-only routes → 403 Forbidden
-
-6. **Unhandled Exceptions**
-   - Process logs error
-   - Server gracefully shuts down
-   - Exit code: 1
-
----
-
-## 📊 Environment Configuration
-
-| Variable | Type | Default | Description |
-|----------|------|---------|-------------|
-| `PORT` | number | 5000 | Server listening port |
-| `NODE_ENV` | string | development | Environment (development/production/test) |
-| `DATABASE_URL` | string | - | PostgreSQL connection string |
-| `JWT_ACCESS_SECRET` | string | - | Secret key for JWT signing (min 32 chars) |
-| `JWT_ACCESS_EXPIRES_IN` | string | 1d | Token expiration (e.g., "1d", "7d", "24h") |
-| `ADMIN_EMAIL` | string | - | Default admin account email |
-| `ADMIN_PASS` | string | - | Default admin account password |
-| `BCRYPT_SALT_ROUNDS` | number | 12 | Password hash salt rounds (10-14 recommended) |
-| `ROLE` | string | admin | Default role for seeded admin user |
-| `SMTP_HOST` | string | - | SMTP server host |
-| `SMTP_USER` | string | - | SMTP authentication username |
-| `SMTP_PASS` | string | - | SMTP authentication password |
-| `SMTP_PORT` | number | 465 | SMTP server port (465 for SSL, 587 for TLS) |
-| `CLIENT_URL` | string | - | Frontend/client application URL |
-| `CLOUDINARY_CLOUD_NAME` | string | - | Cloudinary cloud identifier |
-| `CLOUDINARY_API_KEY` | string | - | Cloudinary API key |
-| `CLOUDINARY_API_SECRET` | string | - | Cloudinary API secret |
-| `STRIPE_SECRET_KEY` | string | - | Stripe secret API key |
-| `REDIS_HOST` | string | localhost | Redis server hostname |
-| `REDIS_PORT` | number | 6379 | Redis server port |
-| `REDIS_PASSWORD` | string | - | Redis password (if required) |
-
----
-
-## 🧪 Development Tips
-
-### Hot Reload Development
-The development server uses **ts-node-dev** with `--respawn` flag for automatic hot reload on file changes:
-```bash
-npm run dev
-```
-
-### Type Safety
-- Entire project written in TypeScript with strict mode enabled
-- All external dependencies have type definitions
-- Maintain type safety when adding new code
-- Use `@types/*` packages for third-party libraries
-
-### Database Migrations
-After modifying `schema.prisma`:
-```bash
-# Create new migration
-npx prisma migrate dev --name AddUserFieldName
-
-# Rollback last migration (dev only)
-npx prisma migrate resolve --rolled-back <migration-name>
-
-# Reset database (dev only - removes all data!)
-npx prisma migrate reset
-```
-
-### Prisma Studio
-Visualize and manage database records in a web UI:
-```bash
-npx prisma studio
-# Opens at http://localhost:5555
-```
-
-### Testing Endpoints
-- Use Postman collection: `E-commerce.postman_collection.json`
-- Import into Postman and set environment variables
-- Test all endpoints with sample data
-
-### Debug Mode
-```bash
-# Enable Node.js debugging
-node --inspect=9229 dist/server.js
-```
-
-### Code Organization Best Practices
-- **Modules**: Feature-based structure (auth, products, cart, etc.)
-- **Controllers**: Handle HTTP request/response logic
-- **Services**: Business logic and database queries
-- **Routes**: Define API endpoints
-- **Schemas**: Zod validation schemas
-- **Utilities**: Reusable helper functions
-- **Middleware**: Cross-cutting concerns (auth, validation, logging)
-
----
-
-## 🚀 Deployment
-
-### Build for Production
-```bash
-# Compile TypeScript
-npx tsc
-
-# Generate Prisma Client
-npx prisma generate
-
-# Run database migrations
 npx prisma migrate deploy
 ```
 
-### Environment Setup (Production)
-Ensure all required variables are set:
-```env
-NODE_ENV=production
-PORT=8080
-DATABASE_URL=<production-db-url>
-JWT_ACCESS_SECRET=<strong-secret-key>
-# ... all other required variables
-```
-
-### Server Startup
+5. Generate Prisma client:
 ```bash
-node dist/server.js
+npx prisma generate
 ```
 
-### Docker Deployment (Optional)
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npx tsc
-RUN npx prisma generate
-EXPOSE 5000
-CMD ["node", "dist/server.js"]
-```
+### Running the Application
 
-### Deployment Platforms
-- **Vercel/Netlify**: Only for serverless APIs
-- **Heroku**: Git push deployment
-- **AWS EC2/ECS**: Full control, scalable
-- **Railway/Render**: Modern platform-as-a-service
-- **DigitalOcean App Platform**: Simple deployment
-- **Self-hosted VPS**: Maximum control
-
-### Performance Optimization
+Development mode:
 ```bash
-# Enable compression
-npm install compression
-
-# Use environment variable for NODE_ENV
-export NODE_ENV=production
-
-# Monitor with process manager
-npm install -g pm2
-pm2 start dist/server.js
+npm run dev
 ```
 
----
+The server will start on `http://localhost:5000`
 
-## 📦 CORS Configuration
+## API Endpoints
 
-### Allowed Origins (Development)
-```javascript
-origin: [
-  "http://localhost:3000",   // Client app
-  "http://localhost:3001",   // Admin panel
-]
-```
+Base URL: `http://localhost:5000/api/v1`
 
-### Production CORS Update
-```typescript
-// src/app.ts
-cors({
-  origin: [
-    "https://yourdomain.com",
-    "https://admin.yourdomain.com"
-  ],
-  credentials: true,
-  methods: ["GET", "POST", "PATCH", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-})
-```
+### Authentication
+- `POST /auth/register` - Register new user
+- `POST /auth/login` - User login
+- `POST /auth/verify-otp` - Verify OTP
+- `POST /auth/forgot-password` - Request password reset
+- `POST /auth/reset-password` - Reset password
 
----
+### Users
+- `GET /users/profile` - Get user profile
+- `PATCH /users/profile` - Update profile
+- `GET /users` - Get all users (admin)
 
-## 🎯 Features Deep Dive
+### Products
+- `GET /products` - Get all products
+- `GET /products/:id` - Get product by ID
+- `POST /products` - Create product (admin)
+- `PATCH /products/:id` - Update product (admin)
+- `DELETE /products/:id` - Delete product (admin)
 
-### Email Integration
-- SMTP configuration with Gmail/custom providers
-- Nodemailer for email sending
-- EJS templates for HTML emails
-- OTP generation and verification
-- Password reset emails
-- Order confirmation notifications
+### Cart
+- `GET /cart` - Get user cart
+- `POST /cart` - Add item to cart
+- `PATCH /cart/:id` - Update cart item
+- `DELETE /cart/:id` - Remove from cart
 
-### File Upload
-- Cloudinary cloud storage integration
-- Multiple storage options
-- Image optimization and transformation
-- Automatic deletion on file update
-- CDN delivery for fast loads
+### Orders
+- `GET /orders` - Get user orders
+- `GET /orders/:id` - Get order details
+- `POST /orders` - Create order
+- `PATCH /orders/:id` - Update order status (admin)
+
+### Payments
+- `POST /payments` - Process payment
+- `GET /payments/:id` - Get payment details
+
+### Address
+- `GET /address` - Get user addresses
+- `POST /address` - Add new address
+- `PATCH /address/:id` - Update address
+- `DELETE /address/:id` - Delete address
+
+### Subscriptions
+- `GET /subscriptions/plans` - Get subscription plans
+- `POST /subscriptions/subscribe` - Subscribe to plan
+- `POST /subscriptions/cancel` - Cancel subscription
+
+### Admin
+- `GET /admin/dashboard` - Admin dashboard stats
+- `GET /admin/users` - Manage users
+- `PATCH /admin/users/:id/status` - Update user status
+
+## Features in Detail
+
+### Authentication & Authorization
+- JWT-based authentication
+- Role-based access control (User/Admin)
+- OTP verification for email
+- Password reset functionality
+- Secure password hashing with bcrypt
 
 ### Payment Processing
-- **Stripe**: International credit/debit cards
-- **Local Methods**: bKash, Nagad, Rocket, uPay
+- Multiple mobile payment methods (Bkash, Nagad, Rocket, Upay)
+- Stripe integration for subscriptions
 - Payment status tracking
-- Refund handling
 - Transaction history
 
-### Job Queue
-- BullMQ for async job processing
-- Email sending jobs
-- Notification queues
-- Report generation
-- Webhook processing
+### Order Management
+- Order lifecycle: Payment Pending → Processing → Confirmed → Shipped → Delivered
+- Order cancellation and refunds
+- Shipping fee calculation
+- Order history tracking
 
-### Redis Caching
-- Session management
-- Rate limiting storage
-- Cache frequently accessed data
-- Pub/Sub for real-time features
+### Background Jobs
+- Email notifications using BullMQ
+- Asynchronous job processing
+- Job failure handling and retries
 
----
+### Rate Limiting
+- Redis-based rate limiting
+- Daily request limits per user
+- Protection against abuse
 
-## 🤝 Contributing
+## Security Features
 
-### Development Workflow
-1. Create feature branch: `git checkout -b feature/your-feature-name`
-2. Make changes following project structure
-3. Test your changes locally: `npm run dev`
-4. Commit with clear message: `git commit -m "Add your feature"`
-5. Push to branch: `git push origin feature/your-feature-name`
-6. Create Pull Request with description
+- JWT token authentication
+- Password hashing with bcrypt
+- Input validation using Zod schemas
+- CORS configuration
+- Environment variable protection
+- SQL injection prevention (Prisma ORM)
 
-### Code Standards
-- Use TypeScript with strict mode
-- Follow existing code structure
-- Add JSDoc comments for functions
-- Write descriptive commit messages
-- Test endpoints with Postman before submitting
+## Error Handling
 
-### Before Submitting PR
-- Ensure no TypeScript errors: `npx tsc --noEmit`
-- Format code: `prettier --write .`
-- Update README if adding new features
-- Test all related endpoints
+- Global error handler middleware
+- Custom error classes
+- Async error catching
+- Detailed error responses in development
+- User-friendly error messages in production
 
----
+## Contributing
 
-## 📄 License
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
 
 This project is licensed under the MIT License.
 
----
+## Support
 
-## 👤 Author & Contact
-
-**Md Hamim**  
-Email: mdhamim5088@gmail.com  
-GitHub: [Your GitHub Profile]
-
----
-
-## 🆘 Support & Issues
-
-For issues, bug reports, or feature requests:
-1. Check existing issues first
-2. Provide detailed problem description
-3. Include error messages and stack traces
-4. Share steps to reproduce the issue
-5. Open issue in the repository
-
----
-
-## 📚 API Documentation
-
-For detailed API documentation and interactive testing:
-- **Postman Collection**: `E-commerce.postman_collection.json`
-- **Swagger/OpenAPI**: (Coming soon)
-- **API Reference**: (Coming soon)
-
----
-
-## 🎯 Roadmap & Future Enhancements
-
-### Current Status
-- [x] User authentication & authorization
-- [x] Product management
-- [x] Shopping cart
-- [x] Order management
-- [x] Payment integration (Stripe)
-- [x] File uploads
-- [x] Email notifications
-
-### Planned Features
-- [ ] Email verification endpoints
-- [ ] Password reset functionality  
-- [ ] Refresh token implementation
-- [ ] Product filtering & advanced search
-- [ ] Product reviews & ratings
-- [ ] Wishlist functionality
-- [ ] Subscription management
-- [ ] Admin dashboard APIs
-- [ ] Comprehensive API documentation (Swagger/OpenAPI)
-- [ ] Unit and integration tests (Jest)
-- [ ] API rate limiting improvements
-- [ ] Caching strategy optimization
-- [ ] Multi-language support (i18n)
-- [ ] Analytics & reporting
-- [ ] Mobile app API considerations
-- [ ] GraphQL implementation (alternative)
-
-### Security Improvements Planned
-- [ ] Two-factor authentication (2FA)
-- [ ] OAuth2/Social login (Google, GitHub, Facebook)
-- [ ] API key management
-- [ ] Webhook signing and verification
-- [ ] Audit logging
-- [ ] DDoS protection
-
----
-
-## 📊 Statistics
-
-- **Total Models**: 10
-- **Total Enums**: 5
-- **API Endpoints**: 50+
-- **TypeScript Version**: 5.9.3
-- **Node Version**: 18+
-- **Database**: PostgreSQL (Neon)
-- **Lines of Code**: ~1000+ (excluding node_modules)
-
----
-
-**Last Updated**: February 15, 2026  
-**Project Status**: Active Development  
-**Version**: 1.0.0
+For support, email mdhamim5088@gmail.com or open an issue in the repository.
