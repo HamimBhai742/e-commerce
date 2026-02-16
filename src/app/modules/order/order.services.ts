@@ -40,12 +40,10 @@ const orderConfirmed = async (
 ) => {
   if (!userId || !paymantStatus || !addressId || !paymentId)
     throw new Error("Invalid data");
-
   return await prisma.$transaction(async (tx) => {
     const user = await tx.user.findUnique({
       where: { id: userId },
     });
-
     if (!user) throw new Error("User not found");
 
     const address = await tx.address.findUnique({
@@ -86,19 +84,19 @@ const orderConfirmed = async (
       if (promo.discount > cartTotal)
         throw new AppError(httpStatus.BAD_REQUEST, "Promo Code not valid");
       const usedPromo = await prisma.usedPromo.findUnique({
-  where: {
-    promo_userId: {
-     userId,promo:promoCode
-    },
-  },
-});
-console.log(usedPromo)
+        where: {
+          promo_userId: {
+            userId, promo: promoCode
+          },
+        },
+      });
+      
       if (usedPromo)
         throw new AppError(httpStatus.BAD_REQUEST, "Promo Code already used");
 
       cartTotal = cartTotal - (cartTotal * promo.discount) / 100;
 
-      await tx.usedPromo.create({data:{userId,promo:promoCode,discount:promo.discount}})
+      await tx.usedPromo.create({ data: { userId, promo: promoCode, discount: promo.discount } })
     }
 
     // 2️⃣ Calculate subtotal
