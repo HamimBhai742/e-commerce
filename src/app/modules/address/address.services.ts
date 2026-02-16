@@ -26,6 +26,13 @@ const createAddress=async( data: IAddress)=>{
     data
   });
 
+  if(address.district !== 'Dhaka'){
+   await prisma.address.update({
+    where:{id:address.id},
+    data:{fees:100}
+   })
+  }
+
   return address;
 }
 

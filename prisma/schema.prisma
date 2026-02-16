@@ -42,6 +42,7 @@ model Address{
   isDefault Boolean @default(false)
   phone String  @unique
   address String?
+  fees Float @default(60)
   userId String 
   user User @relation(fields: [userId],references: [id])
 
@@ -145,7 +146,9 @@ model OnlinePayment{
 model Order{
   id String @id @default(uuid())
   order_number String @unique
+  sub_total Float
   total_amount Float 
+  shippingFee Float?  
   status OrderStatus @default(PAYMENT_PENDING)
   userId String
   user User @relation(fields: [userId],references: [id])
