@@ -202,10 +202,10 @@ model UserSubscription {
 
 model PromoCode {
   id String @id @default(uuid())
-  promo String 
+  promo String   @unique
   discount Float @default(0)
+  startDate DateTime
   expireDate DateTime
-  isUsed Boolean @default(false)
   userId String? 
   user User? @relation(fields: [userId],references: [id])
   createdAt DateTime @default(now())

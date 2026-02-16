@@ -123,6 +123,32 @@ status:PaymentStatus.PENDING
        })
     })
 }
+
+const applyPromoCode=async(userId:string,promoCode:string)=>{
+    let cartTotal = 5600;
+    const promo = await prisma.promoCode.findUnique({
+        where: { promo: promoCode },
+      });
+
+      if (!promo)
+        throw new AppError(httpStatus.NOT_FOUND, "Promo Code does not exist");
+    if(promo.startDate > new Date())
+        throw new AppError(httpStatus.BAD_REQUEST, "Promo Code deal not started");
+      if (promo.expireDate < new Date())
+        throw new AppError(httpStatus.BAD_REQUEST, "Promo Code Expired");
+      if (promo.discount > cartTotal)
+        throw new AppError(httpStatus.BAD_REQUEST, "Promo Code not valid");
+      if (promo.userId === userId)
+        throw new AppError(httpStatus.BAD_REQUEST, "Promo Code already used");
+let discount=Number(cartTotal * promo.discount / 100)
+      cartTotal = cartTotal - discount;
+console.log(cartTotal,discount)
+    //   await tx.promoCode.update({
+    //     where: { id: promo.id },
+    //     data: { userId },
+    //   });
+}
 export const paymentServices = {
     createPaymentSession,
+    applyPromoCode
 };

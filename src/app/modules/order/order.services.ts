@@ -1,6 +1,8 @@
 import { OrderStatus, PaymentStatus } from "../../../../generated/prisma/enums";
 import { otpQueueEmail } from "../../bullMQ/init";
+import { AppError } from "../../error/custom.error";
 import { prisma } from "../../lib/prisma";
+import httpStatus from "http-status";
 import { paymentServices } from "../payment/payment.services";
 
 // const createOrder = async (userId: string,addressId:string) => {
@@ -34,12 +36,12 @@ const orderConfirmed = async (
   userId: string,
   addressId: string,
   paymentId: string,
+  promoCode?: string,
 ) => {
   if (!userId || !paymantStatus || !addressId || !paymentId)
     throw new Error("Invalid data");
 
   return await prisma.$transaction(async (tx) => {
-
     const user = await tx.user.findUnique({
       where: { id: userId },
     });
@@ -51,7 +53,7 @@ const orderConfirmed = async (
     });
 
     if (!address) throw new Error("Address not found");
-   
+
     await tx.payment.update({
       where: { id: paymentId },
       data: { status: paymantStatus },
@@ -67,10 +69,32 @@ const orderConfirmed = async (
 
     if (!cart) throw new Error("Cart items not found");
 
-    const cartTotal = cart.reduce((total, item) => {
+    let cartTotal = cart.reduce((total, item) => {
       return total + item.amount;
     }, 0);
     const order_number = `ORD-${Math.floor(Math.random() * 1000000)}`;
+
+    // 1️⃣ Apply Promo Code
+    if (promoCode) {
+      const promo = await tx.promoCode.findUnique({
+        where: { promo: promoCode },
+      });
+      if (!promo)
+        throw new AppError(httpStatus.NOT_FOUND, "Promo Code not found");
+      if (promo.expireDate < new Date())
+        throw new AppError(httpStatus.BAD_REQUEST, "Promo Code Expired");
+      if (promo.discount > cartTotal)
+        throw new AppError(httpStatus.BAD_REQUEST, "Promo Code not valid");
+      if (promo.userId === userId)
+        throw new AppError(httpStatus.BAD_REQUEST, "Promo Code already used");
+
+      cartTotal = cartTotal - cartTotal * promo.discount / 100;
+
+      await tx.promoCode.update({
+        where: { id: promo.id },
+        data: { userId },
+      });
+    }
 
     // 2️⃣ Calculate subtotal
     const subtotal = Number(cartTotal);
@@ -111,14 +135,19 @@ const orderConfirmed = async (
 
     await otpQueueEmail.add(
       "orderConfirmed",
-      { userName: user.name, email: user.email, subject: "Order Confirmed", orderData },
+      {
+        userName: user.name,
+        email: user.email,
+        subject: "Order Confirmed",
+        orderData,
+      },
       {
         jobId: `${address.id}-${Date.now()}`,
         removeOnComplete: true,
         attempts: 3,
         backoff: { type: "fixed", delay: 5000 },
-      }
-    )
+      },
+    );
   });
 };
 

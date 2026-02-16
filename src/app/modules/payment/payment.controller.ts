@@ -18,6 +18,20 @@ const createPaymentSession=catchAsyncFn(async(req:Request & {user?:IJwtPayload},
     })
 })
 
+const applyPromoCode=catchAsyncFn(async(req:Request & {user?:IJwtPayload},res:Response)=>{
+    const {promo}=req.body
+    const userId=req.user?.id as string
+    const session= await paymentServices.applyPromoCode(userId,promo)
+
+    sendResponse(res, {
+        statusCode: httpStatus.CREATED,
+        success: true,
+        message: "Payment session created successfully",
+        data: session,
+    })
+})
+
 export const paymentController={
-    createPaymentSession
+    createPaymentSession,
+    applyPromoCode
 }
