@@ -31,7 +31,6 @@ import { paymentServices } from "../payment/payment.services";
 //   })
 // };
 
-
 //order confirmed after payment success
 const orderConfirmed = async (
   paymantStatus: PaymentStatus,
@@ -52,6 +51,13 @@ const orderConfirmed = async (
       where: { id: addressId },
     });
 
+    let deleveryTime="3 - 7 days"
+    let deleveryCharge=Number(address?.fees)
+
+    if(address?.district==="Dhaka"){
+      deleveryTime="2 - 3 days"
+    }
+
     if (!address) throw new Error("Address not found");
 
     await tx.payment.update({
@@ -67,9 +73,8 @@ const orderConfirmed = async (
       },
     });
 
-    
     if (!cart) throw new Error("Cart items not found");
- 
+
     //cart total amount
     let cartTotal = cart.reduce((total, item) => {
       return total + item.amount;
@@ -78,39 +83,42 @@ const orderConfirmed = async (
     //generate order number
     const order_number = `ORD-${Math.floor(Math.random() * 1000000)}`;
 
+    let discount = 0;
     // 1️⃣ Apply Promo Code
     if (promoCode) {
-      const promo = await tx.promoCode.findUnique({
+      const promo = await prisma.promoCode.findUnique({
         where: { promo: promoCode },
       });
+
       if (!promo)
         throw new AppError(httpStatus.NOT_FOUND, "Promo Code not found");
-      if(promo.startDate> new Date() )
-        throw new AppError(httpStatus.BAD_REQUEST, "Promo deal not started yet"); 
+      if (promo.startDate > new Date())
+        throw new AppError(httpStatus.BAD_REQUEST, "Promo Code not active yet");
       if (promo.expireDate < new Date())
         throw new AppError(httpStatus.BAD_REQUEST, "Promo Code Expired");
       if (promo.discount > cartTotal)
         throw new AppError(httpStatus.BAD_REQUEST, "Promo Code not valid");
       const usedPromo = await prisma.usedPromo.findUnique({
-        where: {
-          promo_userId: {
-            userId, promo: promoCode
-          },
-        },
+        where: { promo_userId: { promo: promo.promo, userId } },
       });
-
       if (usedPromo)
         throw new AppError(httpStatus.BAD_REQUEST, "Promo Code already used");
 
-      cartTotal = cartTotal - (cartTotal * promo.discount) / 100;
+      if (promo.promo === "WELCOME26") {
+        deleveryCharge = 0;
+      }
 
-      await tx.usedPromo.create({ data: { userId, promo: promoCode, discount: promo.discount } })
+      discount = (cartTotal * promo.discount) / 100;
+cartTotal = cartTotal - discount;
+      await tx.usedPromo.create({
+        data: { userId, promo: promoCode, discount: promo.discount },
+      });
     }
 
     // 2️⃣ Calculate subtotal
     const subtotal = Number(cartTotal);
 
-    const shippingFee = Number(address.fees);
+    const shippingFee = deleveryCharge;
     const totalAmount = subtotal + shippingFee;
 
     // 3️⃣ Create dynamic orderData
@@ -127,7 +135,11 @@ const orderConfirmed = async (
       shippingFee,
       totalAmount,
       deliveryAddress: address.address,
-      paymentMethod: `${paymantStatus} on Delivery`,
+      paymentMethod: `${paymantStatus===PaymentStatus.CASH? "Cash on Delivery" : "Online Payment"}`,
+      orderStatus: OrderStatus.CONFIRMED,
+      discountAmount: discount,
+      discountPercentage: promoCode ? Number(discount) / subtotal * 100 : 0,
+      deleveryTime: deleveryTime
     };
 
     // 4️⃣ Save Order in DB
@@ -144,7 +156,7 @@ const orderConfirmed = async (
       },
     });
 
-    //send email 
+    //send email
     await otpQueueEmail.add(
       "orderConfirmed",
       {
