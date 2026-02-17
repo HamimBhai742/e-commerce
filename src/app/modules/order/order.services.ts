@@ -31,6 +31,8 @@ import { paymentServices } from "../payment/payment.services";
 //   })
 // };
 
+
+//order confirmed after payment success
 const orderConfirmed = async (
   paymantStatus: PaymentStatus,
   userId: string,
@@ -65,11 +67,15 @@ const orderConfirmed = async (
       },
     });
 
+    
     if (!cart) throw new Error("Cart items not found");
-
+ 
+    //cart total amount
     let cartTotal = cart.reduce((total, item) => {
       return total + item.amount;
     }, 0);
+
+    //generate order number
     const order_number = `ORD-${Math.floor(Math.random() * 1000000)}`;
 
     // 1️⃣ Apply Promo Code
@@ -79,6 +85,8 @@ const orderConfirmed = async (
       });
       if (!promo)
         throw new AppError(httpStatus.NOT_FOUND, "Promo Code not found");
+      if(promo.startDate> new Date() )
+        throw new AppError(httpStatus.BAD_REQUEST, "Promo deal not started yet"); 
       if (promo.expireDate < new Date())
         throw new AppError(httpStatus.BAD_REQUEST, "Promo Code Expired");
       if (promo.discount > cartTotal)
@@ -90,7 +98,7 @@ const orderConfirmed = async (
           },
         },
       });
-      
+
       if (usedPromo)
         throw new AppError(httpStatus.BAD_REQUEST, "Promo Code already used");
 
@@ -102,7 +110,7 @@ const orderConfirmed = async (
     // 2️⃣ Calculate subtotal
     const subtotal = Number(cartTotal);
 
-    const shippingFee = 100;
+    const shippingFee = Number(address.fees);
     const totalAmount = subtotal + shippingFee;
 
     // 3️⃣ Create dynamic orderData
@@ -136,6 +144,7 @@ const orderConfirmed = async (
       },
     });
 
+    //send email 
     await otpQueueEmail.add(
       "orderConfirmed",
       {

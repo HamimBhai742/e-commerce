@@ -7,6 +7,7 @@ import httpStatus from "http-status";
 import { otpQueueEmail } from "../../bullMQ/init";
 import { AppError } from "../../error/custom.error";
 
+//register user
 const register=async(payload:UserPayload)=>{
     const existingUser = await prisma.user.findFirst({
         where: { email: payload?.email },
@@ -57,6 +58,7 @@ message:'OTP sent successfully'
  
 }
 
+//resend OTP for registration verification
 const resendRegistrationOtp=async(email:string)=>{
     const user=await prisma.user.findFirst({
         where:{email}

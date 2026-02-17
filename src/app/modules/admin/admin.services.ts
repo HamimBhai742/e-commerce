@@ -3,10 +3,13 @@ import { PromoPayload } from "../../interface/promo"
 import { Userstatus } from "../../interface/user.interface"
 import { prisma } from "../../lib/prisma"
 
+//get all users
 const getAllUsers=async()=>{
     const users=await prisma.user.findMany()
     return users
 }
+
+//manage user status
 const manageUser =async(status:Userstatus,userId:string)=>{
 console.log(status)
     if(status===Userstatus.DELETED){
@@ -35,6 +38,7 @@ return{
 }
 }
 
+//manage order status
 const manageOrder=async(status:OrderStatus,orderId:string)=>{
 await prisma.order.update({
     where:{
@@ -50,7 +54,7 @@ return{
 }
 }
 
-
+//manage payment status
 const managePayment=async(status:PaymentStatus,paymentId:string)=>{
 await prisma.payment.update({
     where:{
@@ -66,6 +70,7 @@ return{
 }
 }  
 
+//create promo code
 const createPromoCode=async(payload:PromoPayload,userId:string)=>{
     await prisma.promoCode.create({
         data:payload
@@ -75,11 +80,13 @@ const createPromoCode=async(payload:PromoPayload,userId:string)=>{
     }
 }
 
+//get all promo codes
 const getAllPromoCodes=async()=>{
     const promocodes=await prisma.promoCode.findMany()
     return promocodes
 }
 
+//get all used promo codes
 const getAllUsedPromoCodes=async()=>{
     const promocodes=await prisma.usedPromo.findMany()
     return promocodes

@@ -4,6 +4,7 @@ import { IAddress } from "../../interface/address";
 import { prisma } from "../../lib/prisma";
 import httpStatus from "http-status";
 
+//create address
 const createAddress=async( data: IAddress)=>{
     console.log(data)
     const existinPhone = await prisma.address.findUnique({
@@ -36,6 +37,7 @@ const createAddress=async( data: IAddress)=>{
   return address;
 }
 
+//get my addresses
 const getMyAddresses=async(userId:string)=>{
     const address=await prisma.address.findMany({
         where:{userId}

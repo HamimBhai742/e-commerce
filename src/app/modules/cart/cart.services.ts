@@ -3,6 +3,7 @@ import { ICart } from "../../interface/cart"
 import { prisma } from "../../lib/prisma"
 import httpStatus from "http-status"
 
+//add to cart
 const addToCart=async(payload:ICart)=>{
     const product=await prisma.product.findUnique({where:{id:payload.productId}})
     if(!product){throw new AppError(httpStatus.NOT_FOUND,'Product not found')}
@@ -17,7 +18,7 @@ const addToCart=async(payload:ICart)=>{
     return await prisma.cart.update({where:{productId_userId:{productId:payload.productId,userId:payload.userId}},data:{quantity:productQuntity,amount:productAmount}})
 }
 
-
+//get my cart items
 const getMyCartItems=async(userId:string)=>{
     return await prisma.cart.findMany({where:{userId},include:{product:{
         select:{

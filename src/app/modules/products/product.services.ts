@@ -5,6 +5,8 @@ import { generateUniqueSlug } from "../../utils/generateUniqueSlug";
 import { generateSKU } from "../../utils/generateSku";
 import { Request } from "express";
 
+
+//create product by admin
 const createProduct = async (req:Request) => {
 
 if (req.file) {
@@ -25,6 +27,8 @@ const sku= generateSKU()
 };
 
 
+
+//get all products
 const getAllProducts = async () => {
   return await prisma.product.findMany();
 };

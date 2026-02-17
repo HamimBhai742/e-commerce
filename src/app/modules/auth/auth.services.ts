@@ -12,6 +12,7 @@ import { otpQueueEmail } from "../../bullMQ/init";
 import { forgetPassTempToken } from "../../utils/forgetPassTempToken";
 import { verifyToken } from "../../utils/verifyToken";
 
+//login user
 const login=async(payload:ILoginPayload)=>{
     const user=await prisma.user.findUnique({where:{email:payload.email}})
     if(!user){
@@ -37,6 +38,7 @@ const login=async(payload:ILoginPayload)=>{
     }
 }
 
+//resend OTP for registration verification
 const sendOtp=async(email:string)=>{
     const user=await prisma.user.findUnique({where:{email}})
 
@@ -66,6 +68,7 @@ const sendOtp=async(email:string)=>{
   
 }
 
+//verify registration OTP
 const verifyRegistrationOTP = async (userId: string, inputOtp: string) => {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw new AppError(httpStatus.NOT_FOUND,"User not found");
@@ -96,7 +99,7 @@ const verifyRegistrationOTP = async (userId: string, inputOtp: string) => {
   return { message: "User verified successfully" };
 };
 
-
+//forget password send reset link by email
 const forgetPassword=async(email:string)=>{
     const user=await prisma.user.findUnique({where:{email}})
     if(!user){
@@ -132,6 +135,7 @@ const forgetPassword=async(email:string)=>{
   })
 }
 
+//reset password
 const resetPassword=async(token:string,password:string)=>{
     if(!token || !password){
         throw new AppError(httpStatus.BAD_REQUEST,'Invalid request')
