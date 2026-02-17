@@ -31,7 +31,22 @@ const applyPromoCode=catchAsyncFn(async(req:Request & {user?:IJwtPayload},res:Re
     })
 })
 
+const checkOut=catchAsyncFn(async(req:Request & {user?:IJwtPayload},res:Response)=>{
+    const userId=req.user?.id as string
+    const addressId=req.body.addressId
+    const promoCode=req.body.promoCode
+    const session= await paymentServices.checkOut(userId,addressId,promoCode)   
+    
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Checkout details retrieved successfully",
+        data: session,
+    })
+})
+
 export const paymentController={
     createPaymentSession,
-    applyPromoCode
+    applyPromoCode,
+    checkOut
 }

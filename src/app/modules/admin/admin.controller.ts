@@ -83,11 +83,42 @@ const getAllUsedPromoCode = catchAsyncFn(
     });
   },
 )
+
+const updatePromoCode = catchAsyncFn(
+  async (req: Request, res: Response) => {
+    const { promoId } = req.params;
+    const user = await adminServices.updatePromoCode(req.body, promoId as string);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Updated promocode successfully",
+      data: user,
+    });
+  },
+);
+
+const deletePromoCode = catchAsyncFn(
+  async (req: Request, res: Response) => {
+    const { promoId } = req.params;
+    const user = await adminServices.deletePromoCode(promoId as string);  
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Deleted promocode successfully",
+      data: user,
+    });
+  },
+);  
+
 export const adminController = {
   manageUser,
   manageOrder,
   managePayment,
   createPromoCode,
   getAllPromoCode,
-  getAllUsedPromoCode
+  getAllUsedPromoCode,
+  updatePromoCode,
+  deletePromoCode
 };

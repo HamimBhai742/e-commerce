@@ -92,6 +92,27 @@ const getAllUsedPromoCodes=async()=>{
     return promocodes
 }
 
+const updatePromoCode=async(payload:PromoPayload, promoId:string)=>{
+    await prisma.promoCode.update({
+        where:{
+            id:promoId
+        },
+        data:payload
+    })
+    return {
+        message:"Promo Code Updated Successfully"
+    }
+}
+
+const deletePromoCode=async(promoId:string)=>{
+    await prisma.promoCode.delete({
+        where:{ id:promoId}
+    })
+    return {
+        message:"Promo Code Deleted Successfully"
+    }
+}
+
 
 export const adminServices={
     manageUser,
@@ -100,6 +121,8 @@ export const adminServices={
     managePayment,
     createPromoCode,
     getAllPromoCodes,
-    getAllUsedPromoCodes
+    getAllUsedPromoCodes,
+    updatePromoCode,
+    deletePromoCode
 }
 
