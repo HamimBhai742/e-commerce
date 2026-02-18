@@ -46,7 +46,7 @@ const managePayment = catchAsyncFn(async (req: Request, res: Response) => {
 const createPromoCode = catchAsyncFn(
   async (req: Request & { user?: any }, res: Response) => {
     const { id } = req.user;
-    const user = await adminServices.createPromoCode(req.body, id);
+    const user = await adminServices.createPromoCode(req.body);
 
     sendResponse(res, {
       success: true,

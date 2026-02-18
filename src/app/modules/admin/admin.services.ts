@@ -71,7 +71,10 @@ return{
 }  
 
 //create promo code
-const createPromoCode=async(payload:PromoPayload,userId:string)=>{
+const createPromoCode=async(payload: PromoPayload)=>{
+    if(payload.startDate>new Date()){
+        payload.status='INACTIVE'
+    }
     await prisma.promoCode.create({
         data:payload
     })

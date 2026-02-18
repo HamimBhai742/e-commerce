@@ -31,7 +31,28 @@ const getMyCartItems=async(userId:string)=>{
     }}})
 }
 
+//update cart item quantity
+const updateCartItemQuantity=async(cartId:string,userId:string,quantity:number)=>{    
+    const cartItem=await prisma.cart.findUnique({where:{id:cartId}})
+    if(!cartItem){throw new AppError(httpStatus.NOT_FOUND,'Cart item not found')}
+    if(cartItem.userId!==userId){throw new AppError(httpStatus.UNAUTHORIZED,'You are not authorized to update this cart item')}    
+    const product=await prisma.product.findUnique({where:{id:cartItem.productId}})
+    if(!product){throw new AppError(httpStatus.NOT_FOUND,'Product not found')}
+    const productAmount=Number(quantity * ( product?.discountPrice ?? product?.price))
+    return await prisma.cart.update({where:{id:cartId},data:{quantity,amount:productAmount}})
+}
+
+//delete cart item
+const deleteCartItem=async(cartId:string,userId:string)=>{
+    const cartItem=await prisma.cart.findUnique({where:{id:cartId}})
+    if(!cartItem){throw new AppError(httpStatus.NOT_FOUND,'Cart item not found')}
+    if(cartItem.userId!==userId){throw new AppError(httpStatus.UNAUTHORIZED,'You are not authorized to delete this cart item')}
+    return await prisma.cart.delete({where:{id:cartId}})
+}
+
 export const cartServices={
     addToCart,
-    getMyCartItems
+    getMyCartItems,
+    updateCartItemQuantity,
+    deleteCartItem
 }

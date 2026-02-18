@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -8,228 +7,235 @@ datasource db {
   provider = "postgresql"
 }
 
-
-model User{
-  id String  @id @default(uuid())
-  name String
-  email String      @unique
-  password String
-  role Role            @default(user)
-  status UserStatus @default(ACTIVE)
-  isVerified Boolean @default(false)
-  isDeleted Boolean @default(false)
-  otp       String? 
-  otpExpiresAt   DateTime?  
- review  Review[]
- cart Cart[]
- address Address[] 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  @@map("users")
-  orders Order[]
-  payments Payment[]
+model User {
+  id                String             @id @default(uuid())
+  name              String
+  email             String             @unique
+  password          String
+  role              Role               @default(user)
+  status            UserStatus         @default(ACTIVE)
+  isVerified        Boolean            @default(false)
+  isDeleted         Boolean            @default(false)
+  otp               String?
+  otpExpiresAt      DateTime?
+  review            Review[]
+  cart              Cart[]
+  address           Address[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  orders            Order[]
+  payments          Payment[]
   userSubscriptions UserSubscription[]
-  usedPromos UsedPromo[]
+  usedPromos        UsedPromo[]
+
+  @@map("users")
 }
 
-model Address{
-  id String @id @default(uuid())
-  aptNumber String
-  aptName String
-  street String
+model Address {
+  id           String  @id @default(uuid())
+  aptNumber    String
+  aptName      String
+  street       String
   sub_district String
-  district String
-  postalCode String
-  isDefault Boolean @default(false)
-  phone String  @unique
-  address String?
-  fees Float @default(60)
-  userId String 
-  user User @relation(fields: [userId],references: [id])
+  district     String
+  postalCode   String
+  isDefault    Boolean @default(false)
+  phone        String  @unique
+  address      String?
+  fees         Float   @default(60)
+  userId       String
+  user         User    @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  orders    Order[]
 
   @@map("address")
-  orders Order[]
 }
 
-
 model Product {
-  id               String   @id @default(uuid())
+  id               String  @id @default(uuid())
   name             String
-  slug             String   @unique
+  slug             String  @unique
   description      String
   shortDescription String?
   price            Float
   discountPrice    Float?
-  sku              String   @unique
+  sku              String  @unique
   stock            Int
-  isInStock        Boolean  @default(true)
-  status           String   @default("active")
-
+  isInStock        Boolean @default(true)
+  status           String  @default("active")
+  isTranding       Boolean @default(false)
+  isDiscounted     Boolean @default(false)
   thumbnail        String
 
-  weight           Float?
-  material         String?
+  weight   Float?
+  material String?
 
-  rating           Float    @default(0)
-  reviewCount      Int      @default(0)
+  rating      Float @default(0)
+  reviewCount Int   @default(0)
 
   cart Cart[]
 
-  isFeatured       Boolean  @default(false)
-  review            Review[]
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  isFeatured Boolean  @default(false)
+  review     Review[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
   @@map("products")
 }
 
 model Review {
-  id String @id @default(uuid())
-  review String
-  userId String
+  id        String  @id @default(uuid())
+  review    String
+  userId    String
   productId String
-  product Product @relation(fields: [productId],references: [id])
-  user User   @relation(fields: [userId],references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  @@unique([productId,userId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([productId, userId])
   @@map("reviews")
 }
 
-
-model Cart{
-  id String @id @default(uuid())
+model Cart {
+  id        String   @id @default(uuid())
   productId String
-  product Product @relation(fields: [productId],references: [id])
-  userId String
-  user User @relation(fields: [userId],references: [id])
-  quantity Float @default(1)
-  amount Float
+  product   Product  @relation(fields: [productId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  quantity  Float    @default(1)
+  amount    Float
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  @@unique([productId,userId])
+
+  @@unique([productId, userId])
   @@map("carts")
 }
 
+model Payment {
+  id          String         @id @default(uuid())
+  status      PaymentStatus  @default(PENDING)
+  sub_total   Float
+  orders      Order[]
+  userId      String
+  user        User           @relation(fields: [userId], references: [id])
+  onlinePayId String?        @unique
+  onlinePay   OnlinePayment? @relation(fields: [onlinePayId], references: [id])
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
-model Payment{
-  id String @id @default(uuid())
-  status PaymentStatus @default(PENDING)
-  sub_total Float 
-  orders Order[]
-  userId String
-  user User @relation(fields: [userId],references: [id])
-  onlinePayId String?  @unique
-  onlinePay OnlinePayment? @relation(fields: [onlinePayId],references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
   @@map("payments")
 }
 
-model OnlinePayment{
-  id String @id @default(uuid())
+model OnlinePayment {
+  id             String         @id @default(uuid())
   payment_method Payment_Method
-  amount Float
-  phone String
-  transactionId String @unique
-    payments Payment[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  amount         Float
+  phone          String
+  transactionId  String         @unique
+  payments       Payment[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   @@map("online_payments")
-
 }
 
-
-model Order{
-  id String @id @default(uuid())
-  order_number String @unique
-  sub_total Float
-  total_amount Float 
-  shippingFee Float?  
-  status OrderStatus @default(PAYMENT_PENDING)
-  userId String
-  user User @relation(fields: [userId],references: [id])
-  items String[]
-  paymentId String   @unique
-  payment Payment  @relation(fields: [paymentId],references: [id])
-  addressId String
-  address Address @relation(fields: [addressId],references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Order {
+  id           String      @id @default(uuid())
+  order_number String      @unique
+  sub_total    Float
+  total_amount Float
+  shippingFee  Float?
+  status       OrderStatus @default(PAYMENT_PENDING)
+  userId       String
+  user         User        @relation(fields: [userId], references: [id])
+  items        String[]
+  paymentId    String      @unique
+  payment      Payment     @relation(fields: [paymentId], references: [id])
+  addressId    String
+  address      Address     @relation(fields: [addressId], references: [id])
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
   @@map("orders")
 }
 
 model SubscriptionPlan {
-  id String @id @default(uuid())
-  name String
-  price Float
-  currency String
-  billingPeriod String 
-  features String[]
-   productId String
-  pricingId String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  @@map("subscription_plans")
+  id                String             @id @default(uuid())
+  name              String
+  price             Float
+  currency          String
+  billingPeriod     String
+  features          String[]
+  productId         String
+  pricingId         String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
   userSubscriptions UserSubscription[]
+
+  @@map("subscription_plans")
 }
 
-
 model UserSubscription {
-  id String @id @default(uuid())
-  userId String
-  user User @relation(fields: [userId],references: [id])
-  planId String
-  plan SubscriptionPlan @relation(fields: [planId],references: [id])
-  status SubscriptionStatus @default(INACTIVE)
+  id            String             @id @default(uuid())
+  userId        String
+  user          User               @relation(fields: [userId], references: [id])
+  planId        String
+  plan          SubscriptionPlan   @relation(fields: [planId], references: [id])
+  status        SubscriptionStatus @default(INACTIVE)
   transactionId String?
   paymentMethod String?
-  startDate DateTime?
-  endDate DateTime?
+  startDate     DateTime?
+  endDate       DateTime?
 
-  cancelAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  cancelAt  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@unique([userId, planId], name: "userId_planId_unique")
   @@map("user_subscriptions")
 }
 
 model PromoCode {
-  id String @id @default(uuid())
-  promo String   @unique
-  discount Float @default(0)
-  startDate DateTime
+  id         String      @id @default(uuid())
+  promo      String      @unique
+  discount   Float       @default(0)
+  status     PromoStatus @default(ACTIVE)
+  startDate  DateTime
   expireDate DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 
   @@map("promo_codes")
 }
 
-model UsedPromo{
-  id String @id @default(uuid())
-  promo String
-  discount Float @default(0)
-  userId String 
-  user User @relation(fields: [userId],references: [id])
+enum PromoStatus {
+  ACTIVE
+  INACTIVE
+  EXPIRED
+}
+
+model UsedPromo {
+  id        String   @id @default(uuid())
+  promo     String
+  discount  Float    @default(0)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("used_promo_codes")
   @@unique([promo, userId], name: "promo_userId")
+  @@map("used_promo_codes")
 }
 
-enum Payment_Method { 
-BKASH
-NAGAD
-ROCKET
-UPAY
+enum Payment_Method {
+  BKASH
+  NAGAD
+  ROCKET
+  UPAY
 }
 
 enum SubscriptionStatus {
@@ -251,7 +257,7 @@ enum PaymentStatus {
 
 enum OrderStatus {
   PROCESSING
-  PAYMENT_PENDING 
+  PAYMENT_PENDING
   CONFIRMED
   SHIPPED
   DELIVERED
@@ -260,7 +266,6 @@ enum OrderStatus {
   FAILED
 }
 
-
 enum UserStatus {
   ACTIVE
   INACTIVE
@@ -268,10 +273,7 @@ enum UserStatus {
   DELETED
 }
 
-
-
-
 enum Role {
   user
- admin
+  admin
 }

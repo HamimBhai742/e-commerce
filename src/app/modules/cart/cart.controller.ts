@@ -18,8 +18,23 @@ const getMyCartItems=catchAsyncFn(async(req:Request &{user?:IJwtPayload},res:Res
     sendResponse(res,{success:true,statusCode:httpStatus.OK,message:'Cart items fetched successfully',data:product})
 })
 
+const updateCartItemQuantity=catchAsyncFn(async(req:Request &{user?:IJwtPayload},res:Response,next:NextFunction)=>{
+    const quantity=Number(req.body.quantity)
+    const product=await cartServices.updateCartItemQuantity(req.params.id as string,req.user?.id as string,quantity)
+
+    sendResponse(res,{success:true,statusCode:httpStatus.OK,message:'Cart item quantity updated successfully',data:product})
+})
+
+const deleteCartItem=catchAsyncFn(async(req:Request &{user?:IJwtPayload},res:Response,next:NextFunction)=>{
+    const product=await cartServices.deleteCartItem(req.params.id as string,req.user?.id as string)
+
+    sendResponse(res,{success:true,statusCode:httpStatus.OK,message:'Cart item deleted successfully',data:product})
+})
+
 
 export const  cartController={
     addToCart,
-    getMyCartItems
+    getMyCartItems,
+    updateCartItemQuantity,
+    deleteCartItem
 }

@@ -76,8 +76,12 @@ const paymentCancel = async (
   orderId: string,
 ) => {};
 
-const checkOut = async (userId: string, addressId?: string,promoCode?:string) => {
-  const cartItems =await prisma.cart.findMany({
+const checkOut = async (
+  userId: string,
+  addressId?: string,
+  promoCode?: string,
+) => {
+  const cartItems = await prisma.cart.findMany({
     where: { userId },
     include: { product: true },
   });
@@ -86,9 +90,9 @@ const checkOut = async (userId: string, addressId?: string,promoCode?:string) =>
     where: { id: addressId },
   });
 
-  let  deleveryTime="3 - 7 days"
-  if(address?.district==="Dhaka"){
-deleveryTime="2 - 3 days"
+  let deleveryTime = "3 - 7 days";
+  if (address?.district === "Dhaka") {
+    deleveryTime = "2 - 3 days";
   }
 
   //cart total amount
@@ -97,39 +101,41 @@ deleveryTime="2 - 3 days"
   }, 0);
   let deliveryCharge = Number(address?.fees) || 0;
   let discount = 0;
-  let discountPercentage=0
-    let afterDiscountCartTotal=cartTotal
-  if(promoCode){
-     const promo = await prisma.promoCode.findUnique({
-    where: { promo: promoCode },
-  });
+  let discountPercentage = 0;
+  let afterDiscountCartTotal = cartTotal;
+  if (promoCode) {
+    const promo = await prisma.promoCode.findUnique({
+      where: { promo: promoCode },
+    });
 
-  if (!promo) throw new AppError(httpStatus.NOT_FOUND, "Promo Code not found");
-  if(promo.startDate > new Date()) throw new AppError(httpStatus.BAD_REQUEST, "Promo Code not active yet");
-  if (promo.expireDate < new Date())
-    throw new AppError(httpStatus.BAD_REQUEST, "Promo Code Expired");
-  if (promo.discount > cartTotal)
-    throw new AppError(httpStatus.BAD_REQUEST, "Promo Code not valid");
-  const usedPromo = await prisma.usedPromo.findUnique({
-    where: { promo_userId: { promo: promo.promo, userId } },
-  });
-  if (usedPromo)
-    throw new AppError(httpStatus.BAD_REQUEST, "Promo Code already used");
+    if (!promo)
+      throw new AppError(httpStatus.NOT_FOUND, "Promo Code not found");
+    if (promo.startDate > new Date())
+      throw new AppError(httpStatus.BAD_REQUEST, "Promo Code not active yet");
+    if (promo.expireDate < new Date())
+      throw new AppError(httpStatus.BAD_REQUEST, "Promo Code Expired");
+    if (promo.discount > cartTotal)
+      throw new AppError(httpStatus.BAD_REQUEST, "Promo Code not valid");
+    const usedPromo = await prisma.usedPromo.findUnique({
+      where: { promo_userId: { promo: promo.promo, userId } },
+    });
+    if (usedPromo)
+      throw new AppError(httpStatus.BAD_REQUEST, "Promo Code already used");
 
-  if(promo.promo==="WELCOME26"){
-    deliveryCharge=0
+    if (promo.promo === "WELCOME26") {
+      deliveryCharge = 0;
+    }
+
+    discount = (cartTotal * promo.discount) / 100;
+    afterDiscountCartTotal = cartTotal - discount;
+    discountPercentage = promo.discount;
   }
 
-  discount = (cartTotal * promo.discount) / 100;
-  afterDiscountCartTotal = cartTotal - discount;
-  discountPercentage=promo.discount
-  }
+  let sub_total = afterDiscountCartTotal;
+  let total = afterDiscountCartTotal + deliveryCharge;
+  let discountAmount = discount;
 
-  let sub_total=afterDiscountCartTotal
-  let total=afterDiscountCartTotal + deliveryCharge
-  let discountAmount=discount
-
-  return{
+  return {
     cartItems,
     address,
     afterDiscountCartTotal,
@@ -139,8 +145,80 @@ deleveryTime="2 - 3 days"
     total,
     discountAmount,
     discountPercentage,
-    deleveryTime
+    deleveryTime,
+  };
+};
+
+const buyNowCheckOut = async (
+  userId: string,
+  productId: string,
+  addressId?: string,
+  promoCode?: string,
+) => {
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+  });
+
+  const address = await prisma.address.findUnique({
+    where: { id: addressId },
+  });
+
+  let deleveryTime = "3 - 7 days";
+  if (address?.district === "Dhaka") {
+    deleveryTime = "2 - 3 days";
   }
+
+  let deliveryCharge = Number(address?.fees) || 0;
+let price = product?.discountPrice || product?.price || 0;
+  let discount = 0;
+  let discountPercentage = 0;
+  let afterDiscountTotal = price;
+  if (promoCode) {
+    const promo = await prisma.promoCode.findUnique({
+      where: { promo: promoCode },
+    });
+
+    if (!promo)
+      throw new AppError(httpStatus.NOT_FOUND, "Promo Code not found");
+    if (promo.startDate > new Date())
+      throw new AppError(httpStatus.BAD_REQUEST, "Promo Code not active yet");
+    if (promo.expireDate < new Date())
+      throw new AppError(httpStatus.BAD_REQUEST, "Promo Code Expired");
+    if (promo.discount > price)
+      throw new AppError(httpStatus.BAD_REQUEST, "Promo Code not valid");
+    if (promo.status !== "ACTIVE")
+      throw new AppError(httpStatus.BAD_REQUEST, "Promo Code not active");
+    const usedPromo = await prisma.usedPromo.findUnique({
+      where: { promo_userId: { promo: promo.promo, userId } },
+    });
+    if (usedPromo)
+      throw new AppError(httpStatus.BAD_REQUEST, "Promo Code already used");
+
+    if (promo.promo === "WELCOME26") {
+      deliveryCharge = 0;
+    }
+
+    discount = (price * promo.discount) / 100;
+    afterDiscountTotal = price - discount;
+    discountPercentage = promo.discount;
+  }
+
+  let sub_total = afterDiscountTotal;
+  let total = afterDiscountTotal + deliveryCharge;
+  let discountAmount = discount;
+
+  return {
+    product,
+    address,
+    deleveryTime,
+    afterDiscountTotal,
+    price,
+    deliveryCharge,
+    sub_total,
+    total,
+    discountAmount,
+    discountPercentage,
+  };
 };
 
 const paymentCash = async (paymentId: string) => {
@@ -223,5 +301,5 @@ export const paymentServices = {
   paymentSuccess,
   paymentCancel,
   checkOut,
-  
+buyNowCheckOut
 };

@@ -6,7 +6,12 @@ import httpStatus from "http-status";
 
 //create address
 const createAddress=async( data: IAddress)=>{
-    console.log(data)
+    const addressCount = await prisma.address.count({
+        where: { userId: data.userId },
+      });
+      if (addressCount >= 5) {
+        throw new AppError(httpStatus.BAD_REQUEST, "You have reached the maximum limit of 5 addresses.");
+      }
     const existinPhone = await prisma.address.findUnique({
       where: {
         phone: data.phone,
@@ -72,12 +77,15 @@ const deleteAddress=async(addressId:string,userId:string)=>{
     const address=await prisma.address.findUnique({
         where:{id:addressId}
     })
+
     if(!address){
         throw new AppError(httpStatus.NOT_FOUND,'Address not found')
     }
+
     if(address.userId!==userId){
         throw new AppError(httpStatus.UNAUTHORIZED,'You are not authorized to delete this address')
     }
+    
     return await prisma.address.delete({
         where:{id:addressId}
     })

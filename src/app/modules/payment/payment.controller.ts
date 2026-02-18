@@ -45,8 +45,24 @@ const checkOut=catchAsyncFn(async(req:Request & {user?:IJwtPayload},res:Response
     })
 })
 
+
+const buyNowCheckOut=catchAsyncFn(async(req:Request & {user?:IJwtPayload},res:Response)=>{
+    const userId=req.user?.id as string
+    const {productId,addressId,promoCode}=req.body
+    const session= await paymentServices.buyNowCheckOut(userId,productId,addressId,promoCode)   
+    
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Checkout details retrieved successfully",
+        data: session,
+    })
+})
+
+
 export const paymentController={
     createPaymentSession,
     applyPromoCode,
-    checkOut
+    checkOut,
+    buyNowCheckOut
 }

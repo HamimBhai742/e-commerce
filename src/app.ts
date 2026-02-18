@@ -5,6 +5,7 @@ import path from "path";
 import httpStatus from 'http-status'
 import router from "./app/routes";
 import { globalErrorHandler } from "./app/middleware/globalErrorHandaler";
+import { startOtpCleaner } from "./app/lib/cronJob";
 
 const app: Application = express();
 app.use(
@@ -21,6 +22,8 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(process.cwd(), "public")));
+
+startOtpCleaner()
 
 app.get("/", (req: Request, res: Response) => {
   res.send('Bus ticket server is running.........');
