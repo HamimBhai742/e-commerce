@@ -60,6 +60,7 @@ model Product {
   description      String
   shortDescription String?
   price            Float
+  discount         Float?  @default(0)
   discountPrice    Float?
   sku              String  @unique
   stock            Int

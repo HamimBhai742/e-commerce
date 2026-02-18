@@ -169,7 +169,7 @@ const buyNowCheckOut = async (
   }
 
   let deliveryCharge = Number(address?.fees) || 0;
-let price = product?.discountPrice || product?.price || 0;
+let price = product?.discountPrice? product.discountPrice : product?.price || 0;
   let discount = 0;
   let discountPercentage = 0;
   let afterDiscountTotal = price;
@@ -200,12 +200,12 @@ let price = product?.discountPrice || product?.price || 0;
 
     discount = (price * promo.discount) / 100;
     afterDiscountTotal = price - discount;
-    discountPercentage = promo.discount;
+    discountPercentage = product?.discount? (product.discount + promo.discount) : promo.discount;
   }
 
   let sub_total = afterDiscountTotal;
   let total = afterDiscountTotal + deliveryCharge;
-  let discountAmount = discount;
+  let discountAmount = product?.discountPrice?((product.price - product.discountPrice) + discount) : 0 + discount;
 
   return {
     product,

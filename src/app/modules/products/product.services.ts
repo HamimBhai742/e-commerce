@@ -13,6 +13,10 @@ if (req.file) {
   req.body.thumbnail = req.file.path;
 }
 
+if(Number(req.body.discount) >0){
+  req.body.discountPrice=req.body.price-(req.body.price*req.body.discount)/100
+}
+
   const payload = req.body as ProductCreateInput;
 const slug = await generateUniqueSlug(payload.name, async (slug) => {
   const existing = await prisma.product.findUnique({

@@ -8,8 +8,7 @@ import { IJwtPayload } from "../../interface/user.interface";
 const createOrder = catchAsyncFn(
   async (
     req: Request & { user?: IJwtPayload },
-    res: Response,
-    next: NextFunction,
+    res: Response
   ) => {
     const order = await orderServices.orderConfirmed(
       req.body.paymentStatus,

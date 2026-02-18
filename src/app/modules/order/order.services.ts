@@ -51,11 +51,11 @@ const orderConfirmed = async (
       where: { id: addressId },
     });
 
-    let deleveryTime="3 - 7 days"
-    let deleveryCharge=Number(address?.fees)
+    let deleveryTime = "3 - 7 days";
+    let deleveryCharge = Number(address?.fees);
 
-    if(address?.district==="Dhaka"){
-      deleveryTime="2 - 3 days"
+    if (address?.district === "Dhaka") {
+      deleveryTime = "2 - 3 days";
     }
 
     if (!address) throw new Error("Address not found");
@@ -109,7 +109,7 @@ const orderConfirmed = async (
       }
 
       discount = (cartTotal * promo.discount) / 100;
-cartTotal = cartTotal - discount;
+      cartTotal = cartTotal - discount;
       await tx.usedPromo.create({
         data: { userId, promo: promoCode, discount: promo.discount },
       });
@@ -135,11 +135,11 @@ cartTotal = cartTotal - discount;
       shippingFee,
       totalAmount,
       deliveryAddress: address.address,
-      paymentMethod: `${paymantStatus===PaymentStatus.CASH? "Cash on Delivery" : "Online Payment"}`,
+      paymentMethod: `${paymantStatus === PaymentStatus.CASH ? "Cash on Delivery" : "Online Payment"}`,
       orderStatus: OrderStatus.CONFIRMED,
       discountAmount: discount,
-      discountPercentage: promoCode ? Number(discount) / subtotal * 100 : 0,
-      deleveryTime: deleveryTime
+      discountPercentage: promoCode ? (Number(discount) / subtotal) * 100 : 0,
+      deleveryTime: deleveryTime,
     };
 
     // 4️⃣ Save Order in DB

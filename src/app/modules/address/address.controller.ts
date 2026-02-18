@@ -5,22 +5,42 @@ import { addressServices } from "./address.services";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
 
-const createAddress=catchAsyncFn(async(req:Request &{user?:IJwtPayload},res:Response,next:NextFunction)=>{
-    req.body.userId=req.user?.id
-    const address=await addressServices.createAddress(req.body)
+const createAddress = catchAsyncFn(
+  async (
+    req: Request & { user?: IJwtPayload },
+    res: Response
+  ) => {
+    req.body.userId = req.user?.id;
+    const address = await addressServices.createAddress(req.body);
 
-    sendResponse(res,{success:true,statusCode:httpStatus.CREATED,message:'Address created successfully',data:address})
-})
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "Address created successfully",
+      data: address,
+    });
+  },
+);
 
-const getMyAddresses=catchAsyncFn(async(req:Request &{user?:IJwtPayload},res:Response,next:NextFunction)=>{
-    const address=await addressServices.getMyAddresses(req.user?.id as string)
+const getMyAddresses = catchAsyncFn(
+  async (
+    req: Request & { user?: IJwtPayload },
+    res: Response
+  ) => {
+    const address = await addressServices.getMyAddresses(
+      req.user?.id as string,
+    );
 
-    sendResponse(res,{success:true,statusCode:httpStatus.OK,message:'Addresses fetched successfully',data:address})
-})
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Addresses fetched successfully",
+      data: address,
+    });
+  },
+);
 
-
-
-export const  addressController={
-    createAddress,
-    getMyAddresses
-}
+export const addressController = {
+  createAddress,
+  getMyAddresses,
+};

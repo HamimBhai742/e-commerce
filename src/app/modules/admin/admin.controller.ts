@@ -45,7 +45,6 @@ const managePayment = catchAsyncFn(async (req: Request, res: Response) => {
 
 const createPromoCode = catchAsyncFn(
   async (req: Request & { user?: any }, res: Response) => {
-    const { id } = req.user;
     const user = await adminServices.createPromoCode(req.body);
 
     sendResponse(res, {
@@ -57,19 +56,16 @@ const createPromoCode = catchAsyncFn(
   },
 );
 
-const getAllPromoCode = catchAsyncFn(
-  async (req: Request, res: Response) => {
-    const user = await adminServices.getAllPromoCodes();
+const getAllPromoCode = catchAsyncFn(async (req: Request, res: Response) => {
+  const user = await adminServices.getAllPromoCodes();
 
-    sendResponse(res, {
-      success: true,
-      statusCode: httpStatus.OK,
-      message: "Retrieved all promocodes successfully",
-      data: user,
-    });
-  },
-);
-
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Retrieved all promocodes successfully",
+    data: user,
+  });
+});
 
 const getAllUsedPromoCode = catchAsyncFn(
   async (req: Request, res: Response) => {
@@ -82,35 +78,31 @@ const getAllUsedPromoCode = catchAsyncFn(
       data: user,
     });
   },
-)
-
-const updatePromoCode = catchAsyncFn(
-  async (req: Request, res: Response) => {
-    const { promoId } = req.params;
-    const user = await adminServices.updatePromoCode(req.body, promoId as string);
-
-    sendResponse(res, {
-      success: true,
-      statusCode: httpStatus.OK,
-      message: "Updated promocode successfully",
-      data: user,
-    });
-  },
 );
 
-const deletePromoCode = catchAsyncFn(
-  async (req: Request, res: Response) => {
-    const { promoId } = req.params;
-    const user = await adminServices.deletePromoCode(promoId as string);  
+const updatePromoCode = catchAsyncFn(async (req: Request, res: Response) => {
+  const { promoId } = req.params;
+  const user = await adminServices.updatePromoCode(req.body, promoId as string);
 
-    sendResponse(res, {
-      success: true,
-      statusCode: httpStatus.OK,
-      message: "Deleted promocode successfully",
-      data: user,
-    });
-  },
-);  
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Updated promocode successfully",
+    data: user,
+  });
+});
+
+const deletePromoCode = catchAsyncFn(async (req: Request, res: Response) => {
+  const { promoId } = req.params;
+  const user = await adminServices.deletePromoCode(promoId as string);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Deleted promocode successfully",
+    data: user,
+  });
+});
 
 export const adminController = {
   manageUser,
@@ -120,5 +112,5 @@ export const adminController = {
   getAllPromoCode,
   getAllUsedPromoCode,
   updatePromoCode,
-  deletePromoCode
+  deletePromoCode,
 };
